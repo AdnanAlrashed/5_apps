@@ -42,7 +42,13 @@ class DocFlexTicketStage(models.Model):
     legend_normal = fields.Char(
         'Grey Kanban Label', default=lambda s: _('In Progress'), translate=True, required=True)
     ticket_count = fields.Integer(compute='_compute_ticket_count')
-
+    code = fields.Char(string="Stage Code", index=True)
+    # team_ids = fields.Many2many(
+    #     'helpdesk.team', relation='team_stage_rel', string='Helpdesk Teams',
+    #     default=lambda self: self.env['helpdesk.team'].search([], limit=1),
+    #     help="Helpdesk teams that can use this stage.\n"
+    #          "If empty, all teams can use this stage.")
+             
     def _compute_ticket_count(self):
         res = self.env['docflex.ticket']._read_group(
             [('stage_id', 'in', self.ids)],

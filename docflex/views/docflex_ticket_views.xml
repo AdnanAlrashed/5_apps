@@ -26,40 +26,14 @@
                     <!-- <field name="use_rating" invisible="1"/> -->
                     <!-- <field name="rating_avg" invisible="1"/> -->
                     <field name="company_id" invisible="1"/>
-                    <!-- <field name="team_privacy_visibility" invisible="1"/> -->
-                    <!-- <div class="oe_button_box" name="button_box">
-                        <button name="action_open_ratings" type="object" class="oe_stat_button" icon="" invisible="not use_rating or rating_count == 0" groups="docflex.group_use_rating">
-                            <i class="fa fa-fw o_button_icon fa-smile-o text-success" invisible="rating_avg &lt; 3.66" title="Satisfied"/>
-                            <i class="fa fa-fw o_button_icon fa-meh-o text-warning" invisible="rating_avg &lt; 2.33 or rating_avg &gt;= 3.66" title="Okay"/>
-                            <i class="fa fa-fw o_button_icon fa-frown-o text-danger" invisible="rating_avg &gt;= 2.33" title="Dissatisfied"/>
-                            <div class="o_field_widget o_stat_info">
-                                <span class="o_stat_value"><field name="rating_avg_text" nolabel="1"/></span>
-                                <span class="o_stat_text">Rating</span>
-                            </div>
-                        </button>
-                        <button class="oe_stat_button" type="object" name="action_open_docflex_ticket" icon="fa-life-ring" invisible="not partner_id or partner_ticket_count == 0">
-                            <div class="o_field_widget o_stat_info">
-                                <div class="d-flex align-items-baseline gap-1">
-                                    <span class="o_stat_value order-1">
-                                        <field name="partner_ticket_count" nolabel="1"/>
-                                    </span>
-                                    <span class="o_stat_text order-2">Tickets</span>
-                                </div>
-                                <div class="d-flex align-items-baseline gap-1">
-                                    <span class="o_stat_value">
-                                        <field name="partner_open_ticket_count" nolabel="1"/>
-                                    </span>
-                                    <span class="o_stat_text order-2">Open</span>
-                                </div>
-                            </div>
-                        </button>
-                    </div> -->
+                    
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <widget name="web_ribbon"
-                        title="جاري الأرشفة"
+                        title="في انتظار الأرشفة"
                         bg_color="text-bg-warning"
-                        invisible="stage_id.name != 'Archiving' or not active"/>
-                                    <field name="kanban_state" widget="state_selection"/>
+                        invisible="not wait_archive or not active"/>
+
+                    <field name="kanban_state" widget="state_selection"/>
                     <!-- <field name="use_sla" invisible="1"/> -->
                     <field name="fold" invisible="1"/>
 
@@ -73,21 +47,6 @@
                             <h2><field name="number"/></h2>
                         </div>
                     </div>
-
-                    <!-- <div class="oe_title">
-                        <h1><field name="name" options="{'line_breaks': False}" widget="text" class="field_name" placeholder="e.g. Product arrived damaged"/></h1>
-                        
-                    </div>
-                    <h2>
-                            <field name="number"/>
-                        </h2> -->
-                    <!-- <div class="d-flex mb-4" invisible="not sla_status_ids" groups="docflex.group_use_sla">
-                        <field name="sla_status_ids" widget="docflex_sla_many2many_tags" invisible="not use_sla" options="{'color_field': 'color', 'no_edit_color': True}" class="mb-0" readonly="1" groups="docflex.group_use_sla"/>
-                        <div invisible="not sla_deadline or not use_sla" groups="docflex.group_use_sla" class="mx-2 text-muted d-inline-flex align-items-center h-100">
-                            <i class="fa fa-lg fa-clock-o me-2 mt-1" aria-label="Sla Deadline" title="Sla Deadline"/>
-                            <field name="sla_deadline" class="mb-0" widget="remaining_days"/>
-                        </div>
-                    </div> -->
                     <group class="mb-0 mt-4">
                         <group>
                             <field name="ticket_type" domain="[('code', '=', context.get('code'))]" invisible="1"/>
@@ -119,7 +78,10 @@
                             <div class="o_row o_row_readonly">
                                 <field name="partner_phone" widget="phone" string="Phone"/>
                                 <span class="fa fa-exclamation-triangle text-warning oe_edit_only"
-                                title="By saving this change, the customer phone number will also be updated." invisible="not is_partner_phone_update"/>
+                                    title="سيتم تحديث رقم الهاتف للجهة عند الحفظ"
+                                    invisible="not is_partner_phone_update"/>
+
+
                             </div>
                             <field name="email_cc" groups="base.group_no_one" invisible="1"/>
                         </group>
@@ -293,6 +255,75 @@
         </field>
     </record>
 
+    <record id="view_docflex_ticket_kanban" model="ir.ui.view">
+        <field name="name">docflex.ticket.kanban</field>
+        <field name="model">docflex.ticket</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_small_column" default_group_by="stage_id">
+                <field name="kanban_state"/>
+                <field name="color"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_card oe_kanban_global_click o_kanban_#{kanban_state}">
+                            <div class="o_kanban_image_fill o_kanban_color_#{color}">
+                                <div class="o_kanban_details">
+                                    <strong><field name="name"/></strong>
+                                    <div class="mt-2">
+                                        <span>الرقم: <field name="number"/></span><br/>
+                                        <span>القسم: <field name="ticket_section_id"/></span><br/>
+                                        <span>الأولوية: <field name="ticket_priority_id"/></span><br/>
+                                        <span>المستخدم: <field name="user_id"/></span>
+                                    </div>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <span class="badge bg-secondary">
+                                        <field name="kanban_state_label"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <record id="docflex_ticket_view_form_mobile" model="ir.ui.view">
+        <field name="name">docflex.ticket.form.mobile</field>
+        <field name="model">docflex.ticket</field>
+        <field name="arch" type="xml">
+            <form string="docflex Ticket" mobile="1">
+                <header>
+                    <field name="stage_id" widget="statusbar_duration" options="{'clickable': '1', 'fold_field': 'fold'}"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="number"/>
+                        <field name="ticket_date"/>
+                        <field name="ticket_type"/>
+                        <field name="ticket_section_id"/>
+                        <field name="ticket_priority_id"/>
+                        <field name="ticket_security_id"/>
+                        <field name="user_id" widget="many2one_avatar_user"/>
+                    </group>
+                    <group>
+                        <field name="partner_from_id"/>
+                        <field name="partner_to_id"/>
+                        <field name="email_cc" groups="base.group_no_one"/>
+                    </group>
+                    <group>
+                        <field name="ticket_summary_id"/>
+                        <field name="referrenc_number"/>
+                    </group>
+                    <group>
+                        <field name="note" widget="text"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
 
     <!-- Actions Enhanced -->
     <record id="action_incoming_memos" model="ir.actions.act_window">
@@ -336,9 +367,6 @@
             <p class="o_view_nocontent_smiling_face">لا توجد مذكرات</p>
         </field>
     </record>
-
-
-
 
     <menuitem id="docflex_main_menue" name="الاتصالات الادارية" web_icon="docflex,static/src/img/ticket.png" sequence="1"/>
     <menuitem id="docflex_config_menue" name="التهيئة" parent="docflex_main_menue" sequence="4"/>

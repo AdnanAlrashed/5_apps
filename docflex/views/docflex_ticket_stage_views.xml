@@ -68,6 +68,7 @@
                             <field name="name"/>
                             <field name="template_id" context="{'default_model': 'docflex.ticket'}"/>
                             <field name="sequence" groups="base.group_no_one"/>
+                            <field name="code" groups="base.group_no_one"/>
                         </group>
                         <group>
                             <field name="fold"/>

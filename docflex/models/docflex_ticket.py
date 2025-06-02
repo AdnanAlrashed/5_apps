@@ -18,6 +18,12 @@ class DoflexTicket(models.Model):
 #     _sql_constraints = [
 #     ('number_unique', 'UNIQUE(number)', 'الرقم التسلسلي يجب أن يكون فريدًا!'),
 # ]
+
+    _order = 'ticket_date desc, id desc'
+    _rec_name = 'number'
+    _check_company_auto = True
+
+    
     
     name = fields.Char(string='الموضوع', required=True, index=True, tracking=True)
 
@@ -172,6 +178,15 @@ class DoflexTicket(models.Model):
     restored_date = fields.Datetime(string="تاريخ الاسترجاع", readonly=True)
     restored_by = fields.Many2one('res.users', string="تم الاسترجاع بواسطة", readonly=True)
 
+    @api.constrains('stage_id')
+    def _check_stage_transition(self):
+        for rec in self:
+            if rec.wait_archive and rec.stage_id:
+                allowed_codes = ['archiving', 'archived']
+                if rec.stage_id.code not in allowed_codes:
+                    raise ValidationError(_("لا يمكن تغيير مرحلة مذكرة بانتظار الأرشفة إلا إلى 'مؤرشف'."))
+    
+
     @api.depends('ticket_date')
     def _compute_date_flags(self):
         today = fields.Date.today()
@@ -215,50 +230,6 @@ class DoflexTicket(models.Model):
         return stages
 
 
-    # def action_mark_waiting_archive(self):
-    #     # البحث عن مرحلة "جاري الأرشفة"
-    #     archive_stage = self.env['docflex.ticket.stage'].search([('name', '=', 'جاري الأرشفة')], limit=1)
-        
-    #     for ticket in self:
-    #         if archive_stage:
-    #             ticket.stage_id = archive_stage.id
-                
-    #         ticket.wait_archive = True
-    #         ticket.request_archive_by = self.env.user
-    #         ticket.request_archive_date = fields.Datetime.now()
-
-    #         # سجل في المحادثات
-    #         ticket.message_post(
-    #             body=_("📦 تم طلب أرشفة المذكرة من قبل: <b>%s</b> في <i>%s</i>") % (
-    #                 ticket.request_archive_by.name,
-    #                 ticket.request_archive_date.strftime('%Y-%m-%d %H:%M')
-    #             )
-    #         )
-
-            # # إرسال تنبيه إلى مدير القسم
-            # if ticket.department_id and ticket.department_id.manager_id and ticket.department_id.manager_id.user_id:
-            #     manager_user = ticket.department_id.manager_id.user_id
-            #     ticket.activity_schedule(
-            #         'mail.mail_activity_data_todo',
-            #         user_id=manager_user.id,
-            #         summary='طلب أرشفة جديد',
-            #         note=_("""\
-            #             <div style='margin:10px;'>
-            #                 <h3 style='color:#875A7B;'>طلب أرشفة جديد</h3>
-            #                 <p><b>المستخدم:</b> %s</p>
-            #                 <p><b>رقم المذكرة:</b> %s</p>
-            #                 <p><b>موضوع المذكرة:</b> %s</p>
-            #                 <p><b>تاريخ الطلب:</b> %s</p>
-            #             </div>
-            #             """) % (
-            #                 ticket.request_archive_by.name,
-            #                 ticket.number,
-            #                 ticket.name,
-            #                 ticket.request_archive_date.strftime('%Y-%m-%d %H:%M')
-            #             )
-            #     )
-
-    
     def action_mark_waiting_archive(self):
         # البحث عن مرحلة "بانتظار الأرشفة"
         # waiting_stage = self.env['docflex.ticket.stage'].search([('code', '=', 'archiving')], limit=1)
@@ -348,25 +319,6 @@ class DoflexTicket(models.Model):
             )
 
 
-    # def action_complete_archive(self):
-    #     # البحث عن مرحلة "مؤرشف"
-    #     archived_stage = self.env['docflex.ticket.stage'].search([('name', '=', 'مؤرشف')], limit=1)
-        
-    #     for ticket in self:
-    #         if archived_stage:
-    #             ticket.stage_id = archived_stage.id
-                
-    #         ticket.active = False
-    #         ticket.archive = True
-    #         ticket.wait_archive = False
-            
-    #         ticket.message_post(
-    #             body=_("✅ تمت أرشفة المذكرة بواسطة: <b>%s</b> في <i>%s</i>") % (
-    #                 self.env.user.name,
-    #                 fields.Datetime.now().strftime('%Y-%m-%d %H:%M')
-    #             )
-    #         )
-
     @api.depends('ticket_date')
     def _compute_ticket_month(self):
         for record in self:
@@ -388,14 +340,6 @@ class DoflexTicket(models.Model):
     def _compute_ticket_date_date(self):
         for record in self:
             record.ticket_date_date = record.ticket_date.date() if record.ticket_date else False
-
-    @api.depends('ticket_date')
-    def _compute_sequence_year(self):
-        for record in self:
-            if record.ticket_date:
-                record.sequence_year = record.ticket_date.strftime('%Y')
-            else:
-                record.sequence_year = fields.Date.today().strftime('%Y')
 
     @api.depends('ticket_date')
     def _compute_sequence_year(self):
@@ -633,9 +577,12 @@ class DoflexTicket(models.Model):
             CREATE INDEX IF NOT EXISTS docflex_ticket_security_idx 
             ON docflex_ticket (ticket_security_id)
         """)
+        self._cr.execute("""
+            CREATE INDEX IF NOT EXISTS docflex_ticket_stage_idx 
+            ON docflex_ticket (stage_id)
+        """)
+
         return res
-
-
 
     is_urgent = fields.Boolean(compute='_compute_is_urgent', store=True)
 

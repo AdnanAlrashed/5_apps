@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- 📚 1. إدراج 5 كتب مسبقة التعريف -->
+    <record id="book_1" model="library.book">
+        <field name="name">The Art of War</field>
+        <field name="isbn">6677</field>
+        <field name="author_id"/>
+        <field name="price">15.99</field>
+        <field name="currency_id" ref="base.USD"/>
+        <field name="publication_date">2015-06-10</field>
+    </record>
+
+    <record id="book_2" model="library.book">
+        <field name="name">1984</field>
+        <field name="isbn">5566</field>
+        <field name="author_id" />
+        <field name="price">10.50</field>
+        <field name="currency_id" ref="base.EUR"/>
+        <field name="publication_date">1949-06-08</field>
+    </record>
+
+    <record id="book_3" model="library.book">
+        <field name="name">Pride and Prejudice</field>
+        <field name="isbn">12</field>
+        <field name="author_id" />
+        <field name="price">12.00</field>
+        <field name="currency_id" ref="base.GBP"/>
+        <field name="publication_date">1813-01-28</field>
+    </record>
+
+    <record id="book_4" model="library.book">
+        <field name="name">Moby Dick</field>
+        <field name="isbn">123</field>
+        <field name="author_id" />
+        <field name="price">18.75</field>
+        <field name="currency_id" ref="base.USD"/>
+        <field name="publication_date">1851-11-14</field>
+    </record>
+
+    <record id="book_5" model="library.book">
+        <field name="name">Hamlet</field>
+        <field name="isbn">33</field>
+        <field name="author_id" />
+        <field name="price">14.99</field>
+        <field name="currency_id" ref="base.EUR"/>
+        <field name="publication_date">1603-01-01</field>
+    </record>
+
+    <!-- ✏️ 2. تحديث سعر كتاب معين -->
+    <record id="book_3" model="library.book">
+        <field name="price">13.50</field>
+    </record>
+
+    <!-- ❌ 3. حذف سجل كتاب معين -->
+    <delete model="library.book" id="book_4"/>
+
+    <!-- ⚙️ 4. استدعاء دالة عند تثبيت الوحدة -->
+    <function model="library.book" name="post_install_hook"/>
+</odoo>

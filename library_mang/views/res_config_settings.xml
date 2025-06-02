@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.book</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="5"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <div class="app_settings_block" data-string="Book" string="Book" data-key="library_mang">
+                    <h2>library Books Setting</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box" id="book">
+                            <div class="o_setting_left_pane">
+                                <field name="enable_auto_discount"/>
+                                <field name="default_discount_rate"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="enable_auto_discount"/>
+                                <label for="default_discount_rate"/>
+                                <div class="text-muted">
+                                    Allow users to hostel user
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="book_config_settings_action" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_id" ref="res_config_settings_view_form"/>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module' : 'library_mang'}</field>
+    </record>
+
+    <menuitem name="Settings" id="book_setting_menu" parent="menu_library_root" action="book_config_settings_action" sequence="50"/>
+
+</odoo>

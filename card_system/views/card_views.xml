@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- action for Card -->
+  <record id="action_card" model="ir.actions.act_window">
+    <field name="name">Card</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">id.card.card</field>
+    <field name="view_mode">tree,form</field>
+    <field name="help" type="html">
+      <p class="oe_view_nocontent_create">
+      Create Card.
+      </p>
+    </field>
+  </record>
+
+    <record id="view_form_id_card_card" model="ir.ui.view">
+        <field name="name">id.card.card.form</field>
+        <field name="model">id.card.card</field>
+        <field name="arch" type="xml">
+            <form string="ID Card">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="citizen_id"/>
+                            <field name="issue_date"/>
+                            <field name="expiry_date"/>
+                            <field name="card_number"/>
+                            <field name="status"/>
+                        </group>
+                        <group string="QR Code">
+                            <field name="qr_code" widget="image" readonly="1" class="oe_avatar"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_tree_id_card_card" model="ir.ui.view">
+        <field name="name">id.card.card.tree</field>
+        <field name="model">id.card.card</field>
+        <field name="arch" type="xml">
+            <tree string="ID Card">
+                <field name="citizen_id"/>
+                <field name="card_number"/>
+                <field name="issue_date"/>
+                <field name="status"/>
+            </tree>
+        </field>
+    </record>
+</odoo>

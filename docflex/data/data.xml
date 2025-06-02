@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- بيانات مراحل المذكرة (docflex.ticket.stage) -->
+    <record id="stage_draft" model="docflex.ticket.stage">
+        <field name="name">جديد</field>
+        <field name="sequence">1</field>
+        <field name="legend_blocked">معلق</field>
+        <field name="legend_done">جاهز</field>
+        <field name="legend_normal">قيد المعالجة</field>
+    </record>
+
+    <record id="stage_in_progress" model="docflex.ticket.stage">
+        <field name="name">قيد التنفيذ</field>
+        <field name="sequence">2</field>
+        <field name="legend_blocked">معلق</field>
+        <field name="legend_done">جاهز</field>
+        <field name="legend_normal">قيد المعالجة</field>
+    </record>
+
+    <record id="stage_done" model="docflex.ticket.stage">
+        <field name="name">فيد الانتظار</field>
+        <field name="sequence">3</field>
+        <field name="legend_blocked">معلق</field>
+        <field name="legend_done">جاهز</field>
+        <field name="legend_normal">قيد المعالجة</field>
+    </record>
+
+    <record id="stage_canceled" model="docflex.ticket.stage">
+        <field name="name">تم الإلغاء</field>
+        <field name="sequence">4</field>
+        <field name="legend_blocked">معلق</field>
+        <field name="legend_done">جاهز</field>
+        <field name="legend_normal">قيد المعالجة</field>
+    </record>
+
+    <record id="stage_done" model="docflex.ticket.stage">
+        <field name="name">تم حلها</field>
+        <field name="sequence">5</field>
+        <field name="fold">True</field>
+        <field name="legend_blocked">معلق</field>
+        <field name="legend_done">جاهز</field>
+        <field name="legend_normal">قيد المعالجة</field>
+    </record>
+
+    <!-- بيانات تصنيف المذكرات (ticket.classification) -->
+    <record id="classification_complaint" model="ticket.classification">
+        <field name="name">شكوى</field>
+        <field name="is_default">True</field>
+        <field name="active">True</field>
+        <field name="color">1</field>
+    </record>
+
+    <record id="classification_request" model="ticket.classification">
+        <field name="name">طلب</field>
+        <field name="active">True</field>
+        <field name="color">2</field>
+    </record>
+
+    <record id="classification_inquiry" model="ticket.classification">
+        <field name="name">استفسار</field>
+        <field name="active">True</field>
+        <field name="color">3</field>
+    </record>
+    
+
+    <!-- بيانات أولويات المذكرات (ticket.priority) -->
+    <record id="priority_highest" model="ticket.priority">
+        <field name="name">عاجل ومهم</field>
+        <field name="code">highest</field>
+        <field name="is_default">True</field>
+        <field name="active">True</field>
+        <field name="color">1</field>
+    </record>
+
+    <record id="priority_high" model="ticket.priority">
+        <field name="name">عاجل وغير مهم</field>
+        <field name="code">high</field>
+        <field name="active">True</field>
+        <field name="color">2</field>
+    </record>
+
+    <record id="priority_medium" model="ticket.priority">
+        <field name="name">غير عاجل ومهم</field>
+        <field name="code">Medium</field>
+        <field name="active">True</field>
+        <field name="color">3</field>
+    </record>
+
+    <record id="priority_low" model="ticket.priority">
+        <field name="name">عادي</field>
+        <field name="code">low</field>
+        <field name="active">True</field>
+        <field name="color">4</field>
+    </record>
+
+    <!-- بيانات أقسام المذكرات (ticket.section) -->
+    <record id="section_paper" model="ticket.section">
+        <field name="name">بريد ورقي</field>
+        <field name="code">paper</field>
+        <field name="connected_with">both</field>
+        <field name="serail_number">SEC-001</field>
+        <field name="active">True</field>
+        <field name="color">1</field>
+    </record>
+
+    <record id="section_mail" model="ticket.section">
+        <field name="name">بريد إلكتروني</field>
+        <field name="code">mail</field>
+        <field name="connected_with">both</field>
+        <field name="serail_number">SEC-002</field>
+        <field name="active">True</field>
+        <field name="color">2</field>
+    </record>
+
+    <record id="section_fax" model="ticket.section">
+        <field name="name">فاكس</field>
+        <field name="code">fax</field>
+        <field name="connected_with">both</field>
+        <field name="serail_number">SEC-003</field>
+        <field name="active">True</field>
+        <field name="color">3</field>
+    </record>
+
+    <!-- بيانات درجات السرية (ticket.security) -->
+    <record id="security_normal" model="ticket.security">
+        <field name="name">عادي</field>
+        <field name="code">normal</field>
+        <field name="is_default">True</field>
+        <field name="active">True</field>
+        <field name="color">1</field>
+    </record>
+
+    <record id="security_secret" model="ticket.security">
+        <field name="name">سري</field>
+        <field name="code">secret</field>
+        <field name="active">True</field>
+        <field name="color">2</field>
+    </record>
+
+    <record id="security_very_secret" model="ticket.security">
+        <field name="name">سري للغاية</field>
+        <field name="code">very_secrt</field>
+        <field name="active">True</field>
+        <field name="color">3</field>
+    </record>
+
+    <!-- بيانات حالات المذكرة (ticket.status) -->
+    <record id="status_execute" model="ticket.status">
+        <field name="name">منفذة</field>
+        <field name="code">execute</field>
+        <field name="is_default">True</field>
+        <field name="active">True</field>
+        <field name="color">1</field>
+    </record>
+
+    <record id="status_on_execute" model="ticket.status">
+        <field name="name">تحت التنفيذ</field>
+        <field name="code">on_execute</field>
+        <field name="active">True</field>
+        <field name="color">2</field>
+    </record>
+
+    <record id="status_rejected" model="ticket.status">
+        <field name="name">مرفوض</field>
+        <field name="code">rejected</field>
+        <field name="active">True</field>
+        <field name="color">3</field>
+    </record>
+
+    <!-- بيانات أنواع التذاكر (ticket.type) -->
+    <record id="type_internal" model="ticket.type">
+        <field name="name">وراد</field>
+        <field name="code">in</field>
+        <field name="serial_number">TYP-001</field>
+        <field name="active">True</field>
+    </record>
+
+    <record id="type_external" model="ticket.type">
+        <field name="name">صادر</field>
+        <field name="code">out</field>
+        <field name="serial_number">TYP-002</field>
+        <field name="active">True</field>
+    </record>
+
+    <!-- <record id="stage_archiving" model="docflex.ticket.stage">
+        <field name="name">جاري الأرشفة</field>
+        <field name="code">archiving</field>
+        <field name="sequence">99</field>
+        <field name="active">True</field>
+        <field name="fold">True</field>
+    </record> -->
+
+</odoo>

@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="docflex_ticket_view_form" model="ir.ui.view">
+        <field name="name">docflex.ticket.form</field>
+        <field name="model">docflex.ticket</field>
+        <field name="arch" type="xml">
+            <form string="docflex Ticket">
+                <header>
+                    <field name="stage_id" widget="statusbar_duration" options="{'clickable': '1', 'fold_field': 'fold'}"/>
+    
+                    <!-- في جزء header -->
+                    <button name="action_mark_waiting_archive" type="object" string="طلب أرشفة" class="btn btn-outline-secondary"
+                        invisible="not active or wait_archive  or user_id != uid" />
+                        
+                    <button name="action_archive" type="object" string="أرشفة الآن" class="btn btn-outline-danger"
+                        invisible="not wait_archive or not active" groups="docflex.group_department_manager"/>
+                        
+                    <button name="action_unarchive" type="object" string="استرجاع من الأرشيف" class="btn btn-outline-primary"
+                        invisible="active" groups="docflex.group_department_manager"/>
+                </header>
+                <sheet>
+                    <field name="legend_blocked" invisible="1"/>
+                    <field name="legend_normal" invisible="1"/>
+                    <field name="legend_done" invisible="1"/>
+                    <!-- <field name="rating_count" invisible="1"/> -->
+                    <!-- <field name="use_rating" invisible="1"/> -->
+                    <!-- <field name="rating_avg" invisible="1"/> -->
+                    <field name="company_id" invisible="1"/>
+                    <!-- <field name="team_privacy_visibility" invisible="1"/> -->
+                    <!-- <div class="oe_button_box" name="button_box">
+                        <button name="action_open_ratings" type="object" class="oe_stat_button" icon="" invisible="not use_rating or rating_count == 0" groups="docflex.group_use_rating">
+                            <i class="fa fa-fw o_button_icon fa-smile-o text-success" invisible="rating_avg &lt; 3.66" title="Satisfied"/>
+                            <i class="fa fa-fw o_button_icon fa-meh-o text-warning" invisible="rating_avg &lt; 2.33 or rating_avg &gt;= 3.66" title="Okay"/>
+                            <i class="fa fa-fw o_button_icon fa-frown-o text-danger" invisible="rating_avg &gt;= 2.33" title="Dissatisfied"/>
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="rating_avg_text" nolabel="1"/></span>
+                                <span class="o_stat_text">Rating</span>
+                            </div>
+                        </button>
+                        <button class="oe_stat_button" type="object" name="action_open_docflex_ticket" icon="fa-life-ring" invisible="not partner_id or partner_ticket_count == 0">
+                            <div class="o_field_widget o_stat_info">
+                                <div class="d-flex align-items-baseline gap-1">
+                                    <span class="o_stat_value order-1">
+                                        <field name="partner_ticket_count" nolabel="1"/>
+                                    </span>
+                                    <span class="o_stat_text order-2">Tickets</span>
+                                </div>
+                                <div class="d-flex align-items-baseline gap-1">
+                                    <span class="o_stat_value">
+                                        <field name="partner_open_ticket_count" nolabel="1"/>
+                                    </span>
+                                    <span class="o_stat_text order-2">Open</span>
+                                </div>
+                            </div>
+                        </button>
+                    </div> -->
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <widget name="web_ribbon"
+                        title="جاري الأرشفة"
+                        bg_color="text-bg-warning"
+                        invisible="stage_id.name != 'Archiving' or not active"/>
+                                    <field name="kanban_state" widget="state_selection"/>
+                    <!-- <field name="use_sla" invisible="1"/> -->
+                    <field name="fold" invisible="1"/>
+
+                    <div class="row justify-content-between position-relative w-100 m-0 mb-2">
+                        <div class="oe_title mw-75 ps-0 pe-2">
+                            
+                            <h1 class="d-flex flex-row align-items-center">
+                                <field name="name" options="{'line_breaks': False}" widget="text" class="field_name" placeholder="e.g. Product arrived damaged"
+                                    required="True" style="font-size: min(4vw, 2.6rem);"/>
+                            </h1>
+                            <h2><field name="number"/></h2>
+                        </div>
+                    </div>
+
+                    <!-- <div class="oe_title">
+                        <h1><field name="name" options="{'line_breaks': False}" widget="text" class="field_name" placeholder="e.g. Product arrived damaged"/></h1>
+                        
+                    </div>
+                    <h2>
+                            <field name="number"/>
+                        </h2> -->
+                    <!-- <div class="d-flex mb-4" invisible="not sla_status_ids" groups="docflex.group_use_sla">
+                        <field name="sla_status_ids" widget="docflex_sla_many2many_tags" invisible="not use_sla" options="{'color_field': 'color', 'no_edit_color': True}" class="mb-0" readonly="1" groups="docflex.group_use_sla"/>
+                        <div invisible="not sla_deadline or not use_sla" groups="docflex.group_use_sla" class="mx-2 text-muted d-inline-flex align-items-center h-100">
+                            <i class="fa fa-lg fa-clock-o me-2 mt-1" aria-label="Sla Deadline" title="Sla Deadline"/>
+                            <field name="sla_deadline" class="mb-0" widget="remaining_days"/>
+                        </div>
+                    </div> -->
+                    <group class="mb-0 mt-4">
+                        <group>
+                            <field name="ticket_type" domain="[('code', '=', context.get('code'))]" invisible="1"/>
+                            <field name="ticket_section_id" />
+                            <field name="ticket_date" />
+                            <field name="is_urgent" />
+                        </group>
+                        <group>
+                            
+                            <field name="company_id" />
+                            <field name="department_id" />
+                            <field name="user_id" class="field_user_id" domain="['&amp;', ('id', 'in', domain_user_ids), ('share', '=', False)]" widget="many2one_avatar_user"/>
+                            <field name="ticket_summary_id" />
+                            <field name="referrenc_number" />
+
+                            <field name="active" invisible="1"/>
+                            <!-- <field name="team_id" required="1" context="{'kanban_view_ref': 'docflex.docflex_team_view_kanban_mobile', 'default_use_sla': True}"/> -->
+                            <field name="domain_user_ids" invisible="1"/>
+                            
+                            <!-- <field name="ticket_type_id" options="{'no_open': True}"/> -->
+                           
+
+                        </group>
+                        <group>
+                            <field name="partner_from_id" class="field_partner_from_id" domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]" widget="res_partner_many2one" context="{'default_phone': partner_phone}"/>
+                            <field name="partner_to_id" class="field_partner_to_id" domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]" widget="res_partner_many2one" context="{'default_phone': partner_phone}"/>
+                            <field name="is_partner_phone_update" invisible="1"/>
+                            <label for="partner_phone" string="Phone"/>
+                            <div class="o_row o_row_readonly">
+                                <field name="partner_phone" widget="phone" string="Phone"/>
+                                <span class="fa fa-exclamation-triangle text-warning oe_edit_only"
+                                title="By saving this change, the customer phone number will also be updated." invisible="not is_partner_phone_update"/>
+                            </div>
+                            <field name="email_cc" groups="base.group_no_one" invisible="1"/>
+                        </group>
+                       
+                        <group>
+                            <field name="ticket_security_id" />
+                            <!-- widget="priority" -->
+                            <field name="ticket_priority_id" />
+                        </group>
+                        <group>
+                            <!-- <field name="number" /> -->
+                            <field name="ticket_classification_id" />
+                            <field name="folder_id" />
+                            <!-- <field name="topic" /> -->
+                            <!-- <field name="ticket_status_id" /> -->
+                            <field name="wait_archive" invisible="wait_archive == False" readonly="1"/>
+                        </group>
+                         <group>
+                            <field name="note" />
+                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
+                             
+                        </group>
+                        
+                    </group>
+                    <!-- <div class="d-flex">
+                        <field name="properties" nolabel="1" columns="2" hideKanbanOption="1"/>
+                    </div> -->
+                    <notebook>
+                        <!-- <field name="display_extra_info" invisible="1"/> -->
+                        <page string="topic" name="topic">
+                            <field name="topic"/>
+                        </page>
+                        <!-- invisible="not display_extra_info" -->
+                        <page string="Extra Info" name="extra_info"
+                              >
+                            <group>
+                                <field name="company_id" groups="base.group_multi_company" context="{'create': False}"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids" options="{'post_refresh': 'recipients'}"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    
+    <!-- docflex ticket tree -->
+  <record id="view_docflex_ticket_tree_view" model="ir.ui.view">
+    <field name="name">docflex.ticket.tree.view</field>
+    <field name="model">docflex.ticket</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name"/>
+        <field name="number"/>
+        <field name="ticket_date" optional="hide"/>
+        <field name="ticket_section_id" optional="show"/>
+        <field name="ticket_priority_id" optional="show"/>
+        <field name="ticket_security_id" optional="show"/>
+        <field name="ticket_status_id" optional="show"/>
+        <field name="kanban_state" nolabel="1" optional="show" widget="state_selection"/>
+        <field name="stage_id" optional="show"/>
+        <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="show"/>
+        <field name="user_id" optional="hide"/>
+        
+      </tree>
+    </field>
+  </record>
+
+  <!-- Search View Enhanced -->
+    <record id="view_docflex_ticket_search" model="ir.ui.view">
+        <field name="name">docflex.ticket.search.advanced</field>
+        <field name="model">docflex.ticket</field>
+        <field name="arch" type="xml">
+            <search string="بحث المذكرات">
+                <!-- البحث السريع -->
+                <field name="number" string="الرقم التسلسلي" filter_domain="[('number', 'ilike', self)]"/>
+                <field name="name" string="الموضوع"/>
+                <field name="partner_from_id" string="الجهة المرسلة"/>
+                <field name="partner_to_id" string="الجهة المستقبلة"/>
+                <field name="topic" string="نص البيان"/>
+                
+                <!-- الفلاتر الأساسية -->
+                <filter string="المذكرات النشطة" name="active" domain="[('active','=',True), ('wait_archive','=',False)]"/>
+                <filter string="المذكرات المؤرشفة" name="archived" domain="[('active','=',False)]"/>
+                <filter string="بانتظار الأرشفة" name="wait_archive" domain="[('wait_archive','=',True)]"/>
+                <filter string="المذكرات المعلقة" name="blocked" domain="[('kanban_state','=','blocked')]"/>
+                
+                <!-- فلترة حسب التاريخ -->
+                <filter string="اليوم" name="today" domain="[('is_today','=',True)]"/>
+                <filter string="هذا الأسبوع" name="this_week" domain="[('is_this_week','=',True)]"/>
+                <filter string="هذا الشهر" name="this_month" domain="[('is_this_month','=',True)]"/>
+
+                <!-- فلترة متقدمة -->
+                <separator/>
+                
+                <group string="فلترة متقدمة">
+                    <filter name="filter_by_type" string="حسب النوع" context="{'group_by':'ticket_type'}"/>
+                    <filter name="filter_by_section" string="حسب القسم" context="{'group_by':'ticket_section_id'}"/>
+                    <filter name="filter_by_priority" string="حسب الأولوية" context="{'group_by':'ticket_priority_id'}"/>
+                    <filter name="filter_by_security" string="حسب السرية" context="{'group_by':'ticket_security_id'}"/>
+                    <filter name="filter_by_status" string="حسب الحالة" context="{'group_by':'ticket_status_id'}"/>
+                    <filter name="filter_by_stage" string="حسب المرحلة" context="{'group_by':'stage_id'}"/>
+                    <filter name="filter_by_department" string="حسب الإدارة" context="{'group_by':'department_id'}"/>
+                    <filter name="filter_by_user" string="حسب المستخدم" context="{'group_by':'user_id'}"/>
+                </group>
+                
+                <!-- حفظ عمليات البحث -->
+                <separator/>
+                <filter name="my_tickets" string="مذكراتي" domain="[('user_id','=',uid)]"/>
+                <filter name="my_department_tickets" string="مذكرات إدارتي" 
+                    domain="['|', ('department_id','=',False), ('department_id.manager_id.user_id','=',uid)]"
+                    groups="docflex.group_department_manager"/>
+                <!-- <filter name="company_tickets" string="مذكرات شركتي" 
+                    domain="[('company_id','=',user.company_id.id)]"
+                    groups="base.group_multi_company"/> -->
+                
+                <!-- المجموعات الذكية -->
+                <group string="تجميع حسب">
+                    <filter name="group_by_year" string="حسب السنة" context="{'group_by': 'sequence_year'}"/>
+                    <filter name="group_by_month" string="حسب الشهر" context="{'group_by': 'ticket_month'}"/>
+                    <filter name="group_by_week" string="حسب الأسبوع" context="{'group_by': 'ticket_week'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="view_docflex_ticket_pivot" model="ir.ui.view">
+        <field name="name">docflex.ticket.pivot</field>
+        <field name="model">docflex.ticket</field>
+        <field name="arch" type="xml">
+            <pivot string="تحليل المذكرات">
+                <field name="ticket_count" type="measure"/>
+
+                <!-- حسب قسم المذكرة -->
+                <field name="ticket_section_id"/>
+
+                <!-- حسب الإدارة -->
+                <field name="department_id"/>
+
+                <!-- حسب درجة الأولوية -->
+                <field name="ticket_priority_id"/>
+
+                <!-- حسب درجة السرية -->
+                <field name="ticket_security_id"/>
+
+                <!-- حسب المرحلة -->
+                <field name="stage_id"/>
+
+                <!-- حسب الوسوم -->
+                <field name="tag_ids"/>
+            </pivot>
+        </field>
+    </record>
+
+
+    <record id="view_docflex_ticket_graph" model="ir.ui.view">
+        <field name="name">docflex.ticket.graph</field>
+        <field name="model">docflex.ticket</field>
+        <field name="arch" type="xml">
+            <graph type="bar">
+                <field name="ticket_date" interval="month" type="row"/>
+                <field name="ticket_type" type="col"/>
+                <!-- <field name="number" type="measure"/> -->
+            </graph>
+        </field>
+    </record>
+
+
+    <!-- Actions Enhanced -->
+    <record id="action_incoming_memos" model="ir.actions.act_window">
+        <field name="name">المذكرات الواردة</field>
+        <field name="res_model">docflex.ticket</field>
+        <field name="view_mode">tree,form,kanban,pivot,graph</field>
+        <field name="domain">[('ticket_type.code', '=', 'in')]</field>
+        <field name="context">{
+            'search_default_active': 1,
+            'search_default_group_by_stage': 1,
+            'code': 'in'
+        }</field>
+        <field name="search_view_id" ref="view_docflex_ticket_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">لا توجد مذكرة واردة</p>
+        </field>
+    </record>
+
+    <record id="action_outgoing_memos" model="ir.actions.act_window">
+        <field name="name">المذكرات الصادرة</field>
+        <field name="res_model">docflex.ticket</field>
+        <field name="view_mode">tree,form,kanban,pivot,graph</field>
+        <field name="domain">[('ticket_type.code', '=', 'out')]</field>
+        <field name="context">{
+            'search_default_active': 1,
+            'search_default_group_by_section': 1,
+            'code': 'out'
+        }</field>
+        <field name="search_view_id" ref="view_docflex_ticket_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">لا توجد مذكرة صادرة</p>
+        </field>
+    </record>
+
+    <record id="docflex_ticket_action_main_tree" model="ir.actions.act_window">
+        <field name="name">المذكرات الرئيسية</field>
+        <field name="res_model">docflex.ticket</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="search_view_id" ref="view_docflex_ticket_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">لا توجد مذكرات</p>
+        </field>
+    </record>
+
+
+
+
+    <menuitem id="docflex_main_menue" name="الاتصالات الادارية" web_icon="docflex,static/src/img/ticket.png" sequence="1"/>
+    <menuitem id="docflex_config_menue" name="التهيئة" parent="docflex_main_menue" sequence="4"/>
+    <menuitem id="docflex_ticket_menue" name="العمليات" parent="docflex_main_menue" sequence="4"/>
+
+    <menuitem id="menu_incoming_memos"
+        name="المذكرات الواردة"
+        parent="docflex_ticket_menue"
+        action="action_incoming_memos"
+        groups="docflex.docflex_super_manager_group"
+        sequence="1"/>
+
+    <menuitem id="menu_outgoing_memos"
+        name="المذكرات الصادره"
+        parent="docflex_ticket_menue"
+        action="action_outgoing_memos"
+        groups="docflex.docflex_super_manager_group"
+        sequence="2"/>
+
+</odoo>

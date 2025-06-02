@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <template id="report_prescription">
+    <t t-call="web.html_container">
+      <t t-foreach="docs" t-as="doc">
+        <t t-call="web.external_layout">
+          <div class="page">
+            <h2>Prescription: <t t-esc="doc.name"/></h2>
+            <p><strong>Doctor:</strong> <t t-esc="doc.doctor_id.name"/></p>
+            <p><strong>Patient:</strong> <t t-esc="doc.patient_id.name"/></p>
+            <p><strong>Date:</strong> <t t-esc="doc.date"/></p>
+            <p><strong>Notes:</strong></p>
+            <p><t t-esc="doc.note"/></p>
+
+            <h4>Medicines:</h4>
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Medicine</th>
+                  <th>Dosage</th>
+                  <th>Quantity</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <t t-foreach="doc.line_ids" t-as="line">
+                  <tr>
+                    <td><t t-esc="line.product_id.name"/></td>
+                    <td><t t-esc="line.dosage"/></td>
+                    <td><t t-esc="line.quantity"/></td>
+                    <td><t t-esc="line.note"/></td>
+                  </tr>
+                </t>
+              </tbody>
+            </table>
+          </div>
+        </t>
+      </t>
+    </t>
+  </template>
+
+  <record id="pharmacy_prescription_report" model="ir.actions.report">
+        <field name="name">Room detail report</field>
+        <field name="model">pharmacy.prescription</field>
+        <field name="report_type">qweb-pdf</field>
+        <!-- <field name="binding_model_id" ref="model_pharmacy_prescription"/> -->
+        <field name="report_name">prescription.report_prescription</field>
+        <field name="report_file">prescription.report_prescription</field>
+    </record>
+</odoo>

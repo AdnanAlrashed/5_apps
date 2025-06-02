@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="module_category_card_system" model="ir.module.category">
+    <field name="name">Card System Management</field>
+    <field name="sequence">31</field>
+  </record>
+  <record id="group_citizen_manager" model="res.groups">
+    <field name="name">Citizen Manager</field>
+    <field name="category_id" ref="module_category_card_system"/>
+    <field name="users" eval="[(4, ref('base.user_root')),(4,ref('base.user_admin'))]"/>
+  </record>
+  <record id="group_citizen_user" model="res.groups">
+    <field name="name">Hostel User</field>
+    <field name="category_id" ref="module_category_card_system"/>
+  </record>
+  
+  <record id="group_card_manager" model="res.groups">
+    <field name="name">Card Manager</field>
+    <field name="category_id" ref="module_category_card_system"/>
+    <field name="users" eval="[(4, ref('base.user_root')),(4,ref('base.user_admin'))]"/>
+  </record>
+  <record id="group_card_user" model="res.groups">
+    <field name="name">Card User</field>
+    <field name="category_id" ref="module_category_card_system"/>
+  </record>
+  
+  <record id="group_request_manager" model="res.groups">
+    <field name="name">Request Manager</field>
+    <field name="category_id" ref="module_category_card_system"/>
+    <field name="users" eval="[(4, ref('base.user_root')),(4,ref('base.user_admin'))]"/>
+  </record>
+  
+  <record id="group_request_user" model="res.groups">
+    <field name="name">Request User</field>
+    <field name="category_id" ref="module_category_card_system"/>
+  </record>
+
+  
+  <record id="group_biometric_manager" model="res.groups">
+    <field name="name">Biometric Manager</field>
+    <field name="category_id" ref="module_category_card_system"/>
+    <field name="users" eval="[(4, ref('base.user_root')),(4,ref('base.user_admin'))]"/>
+  </record>
+
+  <record id="group_biometric_user" model="res.groups">
+    <field name="name">Biometric User</field>
+    <field name="category_id" ref="module_category_card_system"/>
+  </record>
+  
+  <record id="group_branch_manager" model="res.groups">
+    <field name="name">Branch Manager</field>
+    <field name="category_id" ref="module_category_card_system"/>
+    <field name="users" eval="[(4, ref('base.user_root')),(4,ref('base.user_admin'))]"/>
+  </record>
+
+  <record id="group_branch_user" model="res.groups">
+    <field name="name">Branch User</field>
+    <field name="category_id" ref="module_category_card_system"/>
+  </record>
+</odoo>

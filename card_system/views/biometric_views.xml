@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_civil_biometric_tree" model="ir.ui.view">
+        <field name="name">civil.biometric.tree</field>
+        <field name="model">civil.biometric</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="citizen_id"/>
+                <field name="type"/>
+                <field name="data"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_civil_biometric_form" model="ir.ui.view">
+        <field name="name">civil.biometric.form</field>
+        <field name="model">civil.biometric</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="citizen_id"/>
+                        <field name="type"/>
+                        <field name="data"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_civil_biometric" model="ir.actions.act_window">
+        <field name="name">Biometric</field>
+        <field name="res_model">civil.biometric</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

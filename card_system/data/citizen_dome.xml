@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="id_card_citizen_demo_1" model="id.card.citizen">
+        <field name="name">adnan Hassan</field>
+        <field name="gender">male</field>
+        <field name="birth_date">1990-05-20</field>
+        <field name="birth_place">Sadah</field>
+        <field name="nationality">Yemsn</field>
+        <field name="religion">Islam</field>
+        <field name="marital_status">married</field>
+        <field name="address">123 Nile Street, Giza</field>
+        <field name="current_address">45 Tahrir Square, Cairo</field>
+    </record>
+
+    <record id="id_card_citizen_demo_1" model="id.card.citizen">
+        <field name="name">adnan</field>
+        <field name="gender">male</field>
+        <field name="birth_date">1990-05-20</field>
+        <field name="birth_place">Sadah</field>
+        <field name="nationality">Yemsn</field>
+        <field name="religion">Islam</field>
+        <field name="marital_status">married</field>
+        <field name="address">123 Nile Street, Giza</field>
+        <field name="current_address">45 Tahrir Square, Cairo</field>
+    </record>
+
+    <record id="id_card_citizen_demo_2" model="id.card.citizen">
+        <field name="name">khaled Alrashed</field>
+        <field name="gender">male</field>
+        <field name="birth_date">1990-11-02</field>
+        <field name="birth_place">Sadah</field>
+        <field name="nationality">Yemsn</field>
+        <field name="religion">Islam</field>
+        <field name="marital_status">married</field>
+        <field name="address">456 Corniche Street, Alexandria</field>
+        <field name="current_address">Apartment 7, Smouha, Alexandria</field>
+    </record>
+
+    <record id="id_card_citizen_demo_3" model="id.card.citizen">
+        <field name="name">fghtrrrdfddf</field>
+        <field name="gender">male</field>
+        <field name="birth_date">1990-11-02</field>
+        <field name="birth_place">Sadah</field>
+        <field name="nationality">Yemsn</field>
+        <field name="religion">Islam</field>
+        <field name="marital_status">married</field>
+        <field name="address">456 Corniche Street, Alexandria</field>
+        <field name="current_address">Apartment 7, Smouha, Alexandria</field>
+    </record>
+    <record id="id_card_citizen_demo_2" model="id.card.citizen">
+        <field name="name">Bassam Alrashed</field>
+        <field name="gender">male</field>
+        <field name="birth_date">1990-11-02</field>
+        <field name="birth_place">Sadah</field>
+        <field name="nationality">Yemen</field>
+        <field name="religion">Islam</field>
+        <field name="marital_status">married</field>
+        <field name="address">456 Corniche Street, Alexandria</field>
+        <field name="current_address">Apartment 7, Smouha, Alexandria</field>
+    </record>
+    
+    <record id="id_card_citizen_demo_2" model="id.card.citizen">
+        <field name="name">Bassam</field>
+        <field name="gender">male</field>
+        <field name="birth_date">1990-11-02</field>
+        <field name="birth_place">Sadah</field>
+        <field name="nationality">Yemen</field>
+        <field name="religion">Islam</field>
+        <field name="marital_status">married</field>
+        <field name="address">456 Corniche Street, Alexandria</field>
+        <field name="current_address">Apartment 7, Smouha, Alexandria</field>
+    </record>
+    
+    <record id="id_card_citizen_demo_5" model="id.card.citizen">
+        <field name="name">Baseem</field>
+        <field name="gender">male</field>
+        <field name="birth_date">1990-11-02</field>
+        <field name="birth_place">Sadah</field>
+        <field name="nationality">Yemen</field>
+        <field name="religion">Islam</field>
+        <field name="marital_status">married</field>
+        <field name="address">456 Corniche Street, Alexandria</field>
+        <field name="current_address">Apartment 7, Smouha, Alexandria</field>
+    </record>
+
+    <record id="id_card_citizen_demo_7" model="id.card.citizen">
+        <field name="name">Abdulll</field>
+        <field name="gender">male</field>
+        <field name="birth_date">1990-11-02</field>
+        <field name="birth_place">Sadah</field>
+        <field name="nationality">Yemen</field>
+        <field name="religion">Islam</field>
+        <field name="marital_status">married</field>
+        <field name="address">456 Corniche Street, Alexandria</field>
+        <field name="current_address">Apartment 7, Smouha, Alexandria</field>
+    </record>
+
+
+</odoo>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form View -->
+    <record id="view_prescription_form" model="ir.ui.view">
+        <field name="name">pharmacy.prescription.form</field>
+        <field name="model">pharmacy.prescription</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar"/>
+                    
+                    <!-- أزرار مع شروط visibility جديدة -->
+                    <button name="action_confirm" 
+                            type="object" 
+                            string="Confirm" 
+                            class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    
+                    <button name="action_done" 
+                            type="object" 
+                            string="Mark Done" 
+                            class="btn-primary"
+                            invisible="state != 'confirmed'"/>
+                    
+                    <button name="action_cancel" 
+                            type="object" 
+                            string="Cancel" 
+                            class="btn-secondary"
+                            invisible="state in ['done', 'canceled']"/>
+                    
+                    <button name="action_reset_to_draft" 
+                            type="object" 
+                            string="Reset" 
+                            class="btn-secondary"
+                            invisible="state != 'canceled'"/>
+                    
+                    <!-- حقل مع شرط visibility -->
+                    <field name="force_override" 
+                           invisible="state in ['done', 'canceled']"
+                           widget="boolean_toggle"/>
+                           
+                    <!-- عرض التحذير باستخدام invisible الجديد -->
+                    <field name="show_stock_warning" invisible="1"/>
+                    <span invisible="not show_stock_warning or force_override"
+                          class="text-danger font-weight-bold ml-2">
+                        ⚠️ Insufficient stock!
+                    </span>
+                </header>
+                
+                <sheet>
+                    <group>
+                        <field name="name" readonly="1"/>
+                        <field name="doctor_id"/>
+                        <field name="patient_id"/>
+                        <field name="date"/>
+                        <field name="state"/>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Medicines">
+                            <field name="line_ids">
+                                <tree editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="quantity"/>
+                                    <field name="available_qty"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree View -->
+    <record id="view_prescription_tree" model="ir.ui.view">
+        <field name="name">pharmacy.prescription.tree</field>
+        <field name="model">pharmacy.prescription</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="patient_id"/>
+                <field name="doctor_id"/>
+                <field name="date"/>
+                <field name="state" widget="badge"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_prescription" model="ir.actions.act_window">
+        <field name="name">Prescriptions</field>
+        <field name="res_model">pharmacy.prescription</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

@@ -1,0 +1,19 @@
+<odoo>
+    <data>
+        <!-- تحديث النموذج الخاص بشاشة الشريك -->
+        <record id="view_partner_form_inherit" model="ir.ui.view">
+            <field name="name">res.partner.form.inherit</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <!-- إضافة الحقول قبل أول مجموعة في النموذج -->
+                <xpath expr="//form/sheet" position="before">
+                    <group string="Pharmacy Information">
+                        <field name="is_doctor" widget="boolean_toggle" options="{'terminology': 'Doctor'}"/>
+                        <field name="is_patient" widget="boolean_toggle" options="{'terminology': 'Patient'}"/>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

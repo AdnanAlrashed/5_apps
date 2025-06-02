@@ -1,0 +1,21 @@
+<odoo>
+    <record id="view_hostel_room_wizard" model="ir.ui.view">
+    <field name="name">hostel.room.wizard.form</field>
+    <field name="model">hostel.room.wizard</field>
+    <field name="arch" type="xml">
+        <form string="Category Details">
+            <sheet>
+                <group>
+                    <field name="name" readonly="1"/>
+                    <field name="amount" readonly="1"/>
+                </group>
+                <footer>
+                    <button string="Close" class="oe_highlight" special="cancel"/>
+                </footer>
+            </sheet>
+        </form>
+    </field>
+</record>
+
+
+</odoo>

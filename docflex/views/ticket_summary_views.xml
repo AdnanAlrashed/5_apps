@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="docflex_ticket_summary_view_tree" model="ir.ui.view">
+        <field name="name">ticket.summary.tree</field>
+        <field name="model">ticket.summary</field>
+        <field name="arch" type="xml">
+            <tree editable="top" string="الموجز" sample="1" multi_edit="1">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="ticket_section_id"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="docflex_ticket_summary_view_form" model="ir.ui.view">
+        <field name="name">ticket.summary.form</field>
+        <field name="model">ticket.summary</field>
+        <field name="arch" type="xml">
+            <form string="الموجزات">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                        </group>
+                        <group name="" string="">
+                            <field name="ticket_section_id"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_docflex_ticket_summary" model="ir.actions.act_window">
+        <field name="name">موجزات المذكرات</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ticket.summary</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                انشاء موحز مذكرة
+            </p>
+        </field>
+        <field name="domain">[("id", "!=", False)]</field> 
+    </record>
+    <menuitem id="docflex_ticket_summary_menu" name="موجزات المذكرات" parent="docflex_config_menue" action="docflex.action_docflex_ticket_summary" groups="docflex.docflex_super_manager_group" sequence="1"/>
+
+
+</odoo>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <menuitem id="id_card_main_menu" name="ID Card System" web_icon="card_system,static/image/card_system.png" sequence="1"/>
+
+        <menuitem id="menu_citizens" name="Citizens" parent="id_card_main_menu" action="card_system.action_citizens" groups="card_system.group_citizen_manager" sequence="1"/>
+        <menuitem id="menu_cards" name="Cards" parent="id_card_main_menu" action="card_system.action_card" groups="card_system.group_card_manager" sequence="1"/>
+        <menuitem id="menu_request" name="Request" parent="id_card_main_menu" action="card_system.action_request" groups="card_system.group_request_manager" sequence="1"/>
+        <menuitem id="menu_civil_biometric" name="Biometric" parent="id_card_main_menu" action="card_system.action_civil_biometric" groups="card_system.group_biometric_manager" sequence="1"/>
+        <menuitem id="menu_civil_branch" name="Branch" parent="id_card_main_menu" action="card_system.action_civil_branch" groups="card_system.group_biometric_manager" sequence="1"/>
+        <!-- <menuitem id="menu_requests" name="Requests" parent="id_card_main_menu"/> -->
+    </data>
+</odoo>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- action for Card -->
+  <record id="action_request" model="ir.actions.act_window">
+    <field name="name">Request</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">id.card.request</field>
+    <field name="view_mode">tree,form</field>
+    <field name="help" type="html">
+      <p class="oe_view_nocontent_create">
+      Create Request.
+      </p>
+    </field>
+  </record>
+
+    <record id="view_form_id_card_request" model="ir.ui.view">
+        <field name="name">id.card.request.form</field>
+        <field name="model">id.card.request</field>
+        <field name="arch" type="xml">
+            <form string="ID Request">
+                <sheet>
+                    <group>
+                        <field name="citizen_id"/>
+                        <field name="request_date"/>
+                        <field name="state"/>
+                        <field name="rejection_reason"/>
+                        <field name="branch_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_tree_id_card_request" model="ir.ui.view">
+        <field name="name">id.card.request.tree</field>
+        <field name="model">id.card.request</field>
+        <field name="arch" type="xml">
+            <tree string="ID Request">
+                <field name="citizen_id"/>
+                <field name="request_date"/>
+                <field name="state"/>
+                <field name="rejection_reason"/>
+                <field name="branch_id"/>
+            </tree>
+        </field>
+    </record>
+</odoo>

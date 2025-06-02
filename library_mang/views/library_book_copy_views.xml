@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- تعريف عرض نموذج وقائمة لـ library.book.copy -->
+    <record id="view_library_book_copy_tree" model="ir.ui.view">
+        <field name="name">library.book.copy.tree</field>
+        <field name="model">library.book.copy</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="status"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_library_book_copy_form" model="ir.ui.view">
+        <field name="name">library.book.copy.form</field>
+        <field name="model">library.book.copy</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="status"/>
+                        <field name="book_id" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- إجراء لفتح النسخ -->
+    <record id="action_library_book_copy" model="ir.actions.act_window">
+        <field name="name">نسخ الكتب</field>
+        <field name="res_model">library.book.copy</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <!-- قائمة فرعية لعرض النسخ -->
+    <menuitem id="menu_library_book_copies"
+              name="نسخ الكتب"
+              parent="menu_library_root"
+              action="action_library_book_copy"
+              sequence="3"/>
+
+
+     <!-- زر في نموذج الكتاب لعرض النسخ -->
+    <!-- <record id="view_library_book_form" model="ir.ui.view">
+        <field name="name">library.book.form.inherit</field>
+        <field name="model">library.book</field>
+        <field name="inherit_id" ref="library_mang.view_library_book_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <button name="action_view_copies"
+                        string="عرض النسخ"
+                        type="object"
+                        class="oe_highlight"/>
+            </xpath>
+        </field>
+    </record> -->
+</odoo>

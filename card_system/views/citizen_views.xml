@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="action_citizens" model="ir.actions.act_window">
+    <field name="name">Citizens</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">id.card.citizen</field>
+    <field name="view_mode">tree,form</field>
+    <field name="help" type="html">
+      <p class="oe_view_nocontent_create">
+      Create Citizens.
+      </p>
+    </field>
+  </record>
+
+    <record id="view_form_id_card_citizen" model="ir.ui.view">
+        <field name="name">id.card.citizen.form</field>
+        <field name="model">id.card.citizen</field>
+        <field name="arch" type="xml">
+            <form string="Citizen">
+                <sheet>
+                    <div class="row justify-content-between position-relative w-100 m-0 mb-2">
+                        <div class="oe_title mw-75 ps-0 pe-2">
+                            <h1 class="d-flex flex-row align-items-center">
+                                <field name="name" placeholder="Citizen's Name"
+                                  required="True" style="font-size: min(4vw, 2.6rem);"/>
+                            </h1>
+                        </div>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="national_id" readonly="1" style="font-size: min(3vw, 2rem); color: #555;"/>
+                            </h1>
+                        </div>
+                        <div class="o_employee_avatar m-0 p-0">
+                            <field name="photo" widget='image' class="oe_avatar m-0" options='{"zoom": true, "photo":"avatar_128"}'/>
+                        </div>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="birth_date"/>
+                            <field name="gender"/>
+                            <field name="address"/>
+                            <field name="state"/>
+                        </group>
+                        <group>
+                            <field name="qr_code" widget="image" readonly="1" class="oe_avatar"/>
+                        </group>
+                        <group>
+                            <field name="address"/>
+                            <field name="current_address"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Biometric Data">
+                            <field name="biometric_ids">
+                                <tree editable="bottom">
+                                    <field name="type"/>
+                                    <field name="data" filename="data"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                    <div class="o_attachment_preview" options="{'types': ['image', 'pdf'], 'order': 'desc'}"/>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_tree_id_card_citizen" model="ir.ui.view">
+        <field name="name">id.card.citizen.tree</field>
+        <field name="model">id.card.citizen</field>
+        <field name="arch" type="xml">
+            <tree string="Citizen">
+                <field name="name"/>
+                <field name="birth_date"/>
+                <field name="gender"/>
+                <field name="national_id"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+</odoo>

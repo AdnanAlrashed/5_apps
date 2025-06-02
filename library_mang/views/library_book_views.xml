@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- تعريف الإجراء (Action) لفتح قائمة العرض (Tree) والنموذج (Form) -->
+    <record id="action_library_book" model="ir.actions.act_window">
+        <field name="name">الكتب</field>
+        <field name="res_model">library.book</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p>
+                لا توجد كتب حتى الآن. قم بإنشاء واحد جديد!
+            </p>
+        </field>
+    </record>
+
+    <record id="view_library_book_form" model="ir.ui.view">
+        <field name="name">library.book.form</field>
+        <field name="model">library.book</field>
+        <field name="arch" type="xml">
+            <form>
+                <button name="action_view_copies" string="عرض النسخ" type="object"/>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="isbn"/>
+                            <field name="is_available"/>
+                            <field name="copies_sold"/>
+                            <field name="author_id"/>
+                            <field name="publisher_id"/>
+                        </group>
+                        <group>
+                            <field name="currency_id"/>
+                            <field name="monetary_value"/>
+                            <field name="price"/>
+                            <field name="publication_date"/>
+                            <field name="user_id"/>
+                            <field name="discount_price"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="المؤلفين المشاركين" name="co_authors">
+                            <field name="co_authors"/>
+
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Group_By and search library_book -->
+    <record id="view_library_book_filter" model="ir.ui.view">
+        <field name="name">library.book.list.select</field>
+        <field name="model">library.book</field>
+        <field name="arch" type="xml">
+            <search string="الكتب">
+                <field name="name" string="الكتاب"
+                    filter_domain="['|', '|',
+                    ('name', 'ilike', self),
+                    ('is_available', 'ilike', self),
+                    ('publisher_id', 'ilike', self)]"/>
+                <field name="is_available" string="متاح" filter_domain="[
+                    ('is_available', 'ilike', self)
+                    ]"/>
+                <field name="isbn" string="الرقم الدولي للكتاب" filter_domain="[
+                    ('isbn', 'ilike', self)
+                    ]"/>
+                <group expand="0" string="تجميع حسب">
+                    <filter string="الكتاب" name="name" domain="[]" context="{'group_by': 'name'}"/>
+                    <filter string="متاح" name="is_available" domain="[]" context="{'group_by': 'is_available'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <!-- tree for library_book -->
+    <record id="view_library_book_tree" model="ir.ui.view">
+        <field name="name">library.book.tree</field>
+        <field name="model">library.book</field>
+        <field name="arch" type="xml">
+            <tree string="Book">
+                <field name="name"/>
+                <field name="isbn"/>
+                <field name="is_available"/>
+                <field name="copies_sold"/>
+                <field name="author_id"/>
+                <field name="publisher_id" optional="hide" />
+                <field name="price" widget="badge" optional="hide"/>
+                <field name="monetary_value"/>
+                <field name="currency_id"/>
+                <field name="co_authors"/>
+                <field name="publication_date"/>
+                <field name="user_id"/>
+            </tree>
+        </field>
+    </record>
+   
+    <!-- تعريف القائمة الرئيسية (Main Menu) -->
+    <menuitem id="menu_library_root" name="المكتبة" sequence="1"/>
+
+    <!-- تعريف القائمة الفرعية لعرض الكتب -->
+    <menuitem id="menu_library_books"
+              name="الكتب"
+              parent="menu_library_root"
+              action="action_library_book"
+              sequence="2"/>
+
+    
+</odoo>

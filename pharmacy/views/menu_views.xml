@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_pharmacy_root" name="Pharmacy"/>
+    <menuitem id="menu_prescription" name="Prescriptions" parent="menu_pharmacy_root" action="action_prescription"/>
+</odoo>

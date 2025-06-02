@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="ticket_department_rule" model="ir.rule">
+        <field name="name">عرض مذكرات الإدارة فقط</field>
+        <field name="model_id" ref="model_docflex_ticket"/>
+        <field name="domain_force">
+            ['|', ('department_id','=',False),
+                  ('department_id','=', user.department_id.id)]
+        </field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- قاعدة للمستخدم العادي - يرى فقط مذكراته -->
+    <record id="docflex_ticket_user_rule" model="ir.rule">
+        <field name="name">المستخدم يرى مذكراته فقط</field>
+        <field name="model_id" ref="model_docflex_ticket"/>
+        <field name="domain_force">
+            ['|',
+                ('user_id', '=', user.id),
+                ('department_id.manager_id.user_id', '=', user.id)
+            ]
+        </field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- قاعدة للمدير - يرى كل مذكرات قسمه -->
+    <record id="docflex_ticket_manager_rule" model="ir.rule">
+        <field name="name">مدير القسم يرى جميع مذكرات قسمه</field>
+        <field name="model_id" ref="model_docflex_ticket"/>
+        <field name="domain_force">
+            [('department_id', '=', user.employee_id.department_id.id)]
+        </field>
+        <field name="groups" eval="[(4, ref('docflex.group_department_manager'))]"/>
+    </record>
+
+    <!-- قاعدة لمدير الشركة - يرى جميع مذكرات شركته -->
+    <record id="docflex_ticket_company_manager_rule" model="ir.rule">
+        <field name="name">مدير الشركة يرى مذكرات شركته</field>
+        <field name="model_id" ref="model_docflex_ticket"/>
+        <field name="domain_force">
+            [('company_id','=',user.company_id.id)]
+        </field>
+        <field name="groups" eval="[(4, ref('base.group_multi_company'))]"/>
+    </record>
+
+     <!-- قاعدة تقييد المذكرات حسب قسم المستخدم -->
+    <!-- <record id="docflex_ticket_department_rule" model="ir.rule">
+        <field name="name">مذكرات قسم المستخدم فقط</field>
+        <field name="model_id" ref="model_docflex_ticket"/>
+        <field name="domain_force">
+            ['|',
+                ('department_id', '=', False),
+                ('department_id', '=', user.employee_id.department_id.id)
+            ]
+        </field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record> -->
+
+    <!-- <record id="ticket_department_rule_admin" model="ir.rule">
+        <field name="name">عرض مذكرات الإدارة للمسؤولين</field>
+        <field name="model_id" ref="model_docflex_ticket"/>
+        <field name="domain_force">[]</field>
+        <field name="groups" eval="[(4, ref('base.group_system'))]"/> -->
+</odoo>

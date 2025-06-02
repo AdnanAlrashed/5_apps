@@ -1,0 +1,16 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+access_citizen_manager_id,access.citizen.manager,card_system.model_id_card_citizen,card_system.group_citizen_manager,1,1,1,1
+access_citizen_user_id,access.citizen.user,card_system.model_id_card_citizen,card_system.group_citizen_user,1,0,0,0
+
+access_card_manager_id,access.card.manager,card_system.model_id_card_card,card_system.group_card_manager,1,1,1,1
+access_card_user_id,access.card.user,card_system.model_id_card_card,card_system.group_card_user,1,0,0,0
+
+access_request_manager_id,access.request.manager,card_system.model_id_card_request,card_system.group_request_manager,1,1,1,1
+access_request_user_id,access.request.user,card_system.model_id_card_request,card_system.group_request_user,1,0,0,0
+
+access_biometric_manager_id,access.biometric.manager,card_system.model_civil_biometric,card_system.group_biometric_manager,1,1,1,1
+access_biometric_user_id,access.biometric.user,card_system.model_civil_biometric,card_system.group_biometric_user,1,0,0,0
+
+access_branch_manager_id,access.branch.manager,card_system.model_civil_branch,card_system.group_branch_manager,1,1,1,1
+access_branch_user_id,access.branch.user,card_system.model_civil_branch,card_system.group_branch_user,1,0,0,0

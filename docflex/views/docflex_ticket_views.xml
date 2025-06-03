@@ -13,17 +13,27 @@
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                    <button name="action_mark_waiting_archive" type="object" string="طلب أرشفة" class="btn btn-outline-secondary"
-                        invisible="not active or wait_archive or user_id != uid" />
-                    
-                    <button name="action_cancel_archive_request" type="object" string="إلغاء طلب الأرشفة" class="btn btn-outline-warning"
-                        invisible="not wait_archive or not active"/>
+                        <button name="action_mark_waiting_archive" type="object" string="طلب أرشفة" class="btn btn-outline-secondary"
+                            invisible="not active or wait_archive or user_id != uid" />
                         
-                    <button name="action_archive" type="object" string="أرشفة الآن" class="btn btn-outline-danger"
-                        invisible="not wait_archive or not active" groups="docflex.group_department_manager"/>
+                        <button name="action_cancel_archive_request" type="object" string="إلغاء طلب الأرشفة" class="btn btn-outline-warning"
+                            invisible="not wait_archive or not active"/>
+                            
+                        <button name="action_archive" type="object" string="أرشفة الآن" class="btn btn-outline-danger"
+                            invisible="not wait_archive or not active" groups="docflex.group_department_manager"/>
+                            
+                        <button name="action_unarchive" type="object" string="استرجاع من الأرشيف" class="btn btn-outline-primary"
+                            invisible="active" groups="docflex.group_department_manager"/>
                         
-                    <button name="action_unarchive" type="object" string="استرجاع من الأرشيف" class="btn btn-outline-primary"
-                        invisible="active" groups="docflex.group_department_manager"/>
+                        <button class="oe_stat_button"
+                                name="action_force_sync_documents"
+                                type="object"
+                                icon="fa-file-text-o"
+                                groups="documents.group_documents_user"
+                                invisible="not id">
+                            <field string="Documents" name="document_count" widget="statinfo"/>
+                        </button>
+                        
                 </div>
                     <field name="legend_blocked" invisible="1"/>
                     <field name="legend_normal" invisible="1"/>
@@ -122,12 +132,41 @@
                             <field name="topic"/>
                         </page>
                         <!-- invisible="not display_extra_info" -->
-                        <page string="Extra Info" name="extra_info"
-                              >
+                        <page string="Extra Info" name="extra_info">
                             <group>
                                 <field name="company_id" groups="base.group_multi_company" context="{'create': False}"/>
                             </group>
                         </page>
+                        <!-- استبدال صفحة المرفقات الحالية بهذا -->
+                        <!-- <page string="المرفقات" name="attachments" invisible="1">
+                            <div class="oe_attachment_view">
+                                <field name="attachment_ids" widget="many2many_binary" 
+                                    options="{
+                                        'preview': True,
+                                        'editable': True,
+                                        'accepted_file_extensions': '.pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx',
+                                        'upload': True,
+                                        'multi_upload': True
+                                    }"/>
+                                <div class="oe_attachment_stats">
+                                    <field name="attachment_number" string="عدد المرفقات"/>
+                                    <field name="document_count" string="عدد المستندات"/>
+                                </div>
+                            </div>
+                        </page> -->
+                        <page string="إعدادات المستندات" name="documents_settings" groups="base.group_multi_company">
+                            <group>
+                                <field name="documents_folder_id" 
+                                    options="{'no_create': True, 'no_open': True}"/>
+                                
+                            </group>
+                        </page>
+                        <!-- <page string="إعدادات المستندات" name="documents_settings" >
+                            <group>
+                                <field name="documents_folder_id" 
+                                    options="{'no_create': True, 'no_open': True}"/>
+                            </group>
+                        </page> -->
                     </notebook>
                 </sheet>
                 <div class="oe_chatter">

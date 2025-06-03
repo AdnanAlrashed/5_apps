@@ -10,6 +10,7 @@ class DoflexTicket(models.Model):
         'rating.mixin',
         'mail.activity.mixin',
         'mail.tracking.duration.mixin',
+        'ir.attachment',
     ]
     
   

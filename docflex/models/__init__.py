@@ -18,3 +18,4 @@ from . import ticket_referrals
 from . import ticket_status
 from . import ticket_asset
 from . import docflex_ticket
+from . import ticket_attachment

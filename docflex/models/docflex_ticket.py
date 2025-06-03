@@ -1,5 +1,5 @@
 from odoo import models , fields, api ,Command, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 class DoflexTicket(models.Model):
     _name = 'docflex.ticket'
     # _inherit="helpdesk.ticket"
@@ -94,8 +94,8 @@ class DoflexTicket(models.Model):
     )
     stage_id = fields.Many2one(
         'docflex.ticket.stage', string='المرحلة',
-          store=True,
-        readonly=False, ondelete='restrict',
+        store=True,
+        ondelete='restrict',
         tracking=1,
         copy=False, index=True
     )
@@ -118,15 +118,15 @@ class DoflexTicket(models.Model):
     closed_by_partner = fields.Boolean('Closed by Partner', readonly=True)
     tag_ids = fields.Many2many('docflex.tag', string='Tags')
     company_id = fields.Many2one(
-    'res.company', 
-    string='Company', 
-    default=lambda self: self.env.company,
-    required=True,
-    ondelete='restrict',
-    tracking=True,
-    readonly=True,  # Make it readonly to prevent changes from the form view
-    domain="[('id', 'in', [company_id.id])]"  # Ensure it only shows the current company
-    )
+        'res.company', 
+        string='Company', 
+        default=lambda self: self.env.company,
+        required=True,
+        ondelete='restrict',
+        tracking=True,
+        readonly=True,  # Make it readonly to prevent changes from the form view
+        domain="[('id', 'in', [company_id.id])]"  # Ensure it only shows the current company
+        )
     department_id = fields.Many2one('hr.department', string='User Department', readonly=True)
     user_id = fields.Many2one('res.users', string='Created by User', readonly=True)
     user_name = fields.Char(string="User Name", readonly=True)
@@ -178,6 +178,13 @@ class DoflexTicket(models.Model):
     restored_date = fields.Datetime(string="تاريخ الاسترجاع", readonly=True)
     restored_by = fields.Many2one('res.users', string="تم الاسترجاع بواسطة", readonly=True)
 
+    @api.depends('stage_id')
+    def _compute_is_archived(self):
+        for record in self:
+            record.is_archived = record.stage_id.code in ['archiving', 'archived'] if record.stage_id else False
+
+    is_archived = fields.Boolean(compute='_compute_is_archived', store=True, string="Is Archived")
+
     @api.constrains('stage_id')
     def _check_stage_transition(self):
         for rec in self:
@@ -186,7 +193,93 @@ class DoflexTicket(models.Model):
                 if rec.stage_id.code not in allowed_codes:
                     raise ValidationError(_("لا يمكن تغيير مرحلة مذكرة بانتظار الأرشفة إلا إلى 'مؤرشف'."))
     
+    # def write(self, vals):
+    #     for ticket in self:
+    #         stage_code = ticket.stage_id.code if ticket.stage_id else False
 
+    #         # الحالات المسموح بها لتعديل المذكرة في مراحل الأرشفة:
+    #         is_unarchiving = (
+    #             self.env.context.get('allow_unarchive') and
+    #             vals.get('active') is True and
+    #             'stage_id' in vals
+    #         )
+
+    #         is_requesting_archive = (
+    #             self.env.context.get('request_archive') and
+    #             vals.get('wait_archive') is True and
+    #             'stage_id' in vals
+    #         )
+
+    #         is_archiving = (
+    #             self.env.context.get('do_archive') and
+    #             vals.get('active') is False and
+    #             vals.get('wait_archive') is False  # تأكد أن wait_archive يتم تعطيله
+    #         )
+
+    #         # لا تمنع التعديل إذا كانت المذكرة في مرحلة "انتظار الأرشفة" (archiving) 
+    #         # ويتم تنفيذ عملية أرشفة فعلية (is_archiving = True)
+    #         if stage_code == 'archived' and not (is_unarchiving or is_requesting_archive or is_archiving):
+    #             raise ValidationError(_("لا يمكن تعديل المذكرة المؤرشفة إلا عند الاسترجاع."))
+            
+    #         if stage_code == 'archiving' and not (is_requesting_archive or is_archiving):
+    #             raise ValidationError(_("لا يمكن تعديل المذكرة في انتظار الأرشفة إلا عند تنفيذ الأرشفة أو إلغاء الطلب."))
+
+    #         result = super().write(vals)
+
+    #         # تحديث المرحلة إلى "مؤرشف" إذا تم تعطيل المذكرة
+    #         if 'active' in vals and vals['active'] is False:
+    #             archived_stage = self.env['docflex.ticket.stage'].search([('code', '=', 'archived')], limit=1)
+    #             if archived_stage:
+    #                 super(DoflexTicket, self).write({'stage_id': archived_stage.id})
+
+    #     return result
+
+    def write(self, vals):
+        for ticket in self:
+            stage_code = ticket.stage_id.code if ticket.stage_id else False
+
+            # الحالات المسموح بها لتعديل المذكرة في مراحل الأرشفة:
+            is_unarchiving = (
+                self.env.context.get('allow_unarchive') and
+                vals.get('active') is True and
+                'stage_id' in vals
+            )
+
+            is_requesting_archive = (
+                self.env.context.get('request_archive') and
+                vals.get('wait_archive') is True and
+                'stage_id' in vals
+            )
+
+            is_archiving = (
+                self.env.context.get('do_archive') and
+                vals.get('active') is False and
+                vals.get('wait_archive') is False
+            )
+
+            is_canceling_archive = (
+                self.env.context.get('cancel_archive') and
+                vals.get('wait_archive') is False
+            )
+
+            # لا تمنع التعديل إذا كانت المذكرة في مرحلة "انتظار الأرشفة" (archiving) 
+            # ويتم تنفيذ عملية أرشفة فعلية أو إلغاء
+            if stage_code == 'archived' and not (is_unarchiving or is_requesting_archive or is_archiving or is_canceling_archive):
+                raise ValidationError(_("لا يمكن تعديل المذكرة المؤرشفة إلا عند الاسترجاع."))
+            
+            if stage_code == 'archiving' and not (is_requesting_archive or is_archiving or is_canceling_archive):
+                raise ValidationError(_("لا يمكن تعديل المذكرة في انتظار الأرشفة إلا عند تنفيذ الأرشفة أو إلغاء الطلب."))
+
+            result = super().write(vals)
+
+            # تحديث المرحلة إلى "مؤرشف" إذا تم تعطيل المذكرة
+            if 'active' in vals and vals['active'] is False:
+                archived_stage = self.env['docflex.ticket.stage'].search([('code', '=', 'archived')], limit=1)
+                if archived_stage:
+                    super(DoflexTicket, self).write({'stage_id': archived_stage.id})
+
+        return result
+    
     @api.depends('ticket_date')
     def _compute_date_flags(self):
         today = fields.Date.today()
@@ -231,21 +324,23 @@ class DoflexTicket(models.Model):
 
 
     def action_mark_waiting_archive(self):
-        # البحث عن مرحلة "بانتظار الأرشفة"
-        # waiting_stage = self.env['docflex.ticket.stage'].search([('code', '=', 'archiving')], limit=1)
-        
+        """زر لطلب أرشفة المذكرة"""
+
         waiting_stage = self.env['docflex.ticket.stage'].search(
-            [('name', '=', 'جاري الأرشفة')], 
+            [('code', '=', 'archiving')],  # تأكد أن المرحلة لها code ثابت = archiving
             limit=1
         )
-        
+
         for ticket in self:
-            if waiting_stage:
-                ticket.stage_id = waiting_stage.id
-                
-            ticket.wait_archive = True
-            ticket.request_archive_by = self.env.user
-            ticket.request_archive_date = fields.Datetime.now()
+            if not waiting_stage:
+                raise ValidationError(_("لم يتم العثور على مرحلة 'جاري الأرشفة'. تأكد من وجودها."))
+
+            ticket.with_context(request_archive=True).write({
+                'stage_id': waiting_stage.id,
+                'wait_archive': True,
+                'request_archive_by': self.env.user.id,
+                'request_archive_date': fields.Datetime.now(),
+            })
 
             # سجل في المحادثات
             ticket.message_post(
@@ -254,6 +349,7 @@ class DoflexTicket(models.Model):
                     ticket.request_archive_date.strftime('%Y-%m-%d %H:%M')
                 )
             )
+
             # إرسال تنبيه إلى مدير القسم
             if ticket.department_id and ticket.department_id.manager_id and ticket.department_id.manager_id.user_id:
                 manager_user = ticket.department_id.manager_id.user_id
@@ -269,55 +365,90 @@ class DoflexTicket(models.Model):
                             <p><b>موضوع المذكرة:</b> %s</p>
                             <p><b>تاريخ الطلب:</b> %s</p>
                         </div>
-                        """) % (
-                            ticket.request_archive_by.name,
-                            ticket.number,
-                            ticket.name,
-                            ticket.request_archive_date.strftime('%Y-%m-%d %H:%M')
-                        )
+                    """) % (
+                        ticket.request_archive_by.name,
+                        ticket.number,
+                        ticket.name,
+                        ticket.request_archive_date.strftime('%Y-%m-%d %H:%M')
+                    )
                 )
 
-    def action_archive(self):
-        # البحث عن مرحلة "مؤرشف"
-        archived_stage = self.env['docflex.ticket.stage'].search(
-            [('name', '=', 'مؤرشف')], 
-            limit=1
-        )
-        
+    def action_cancel_archive_request(self):
+        """إلغاء طلب الأرشفة وإعادة المذكرة إلى المرحلة السابقة"""
         for ticket in self:
-            if archived_stage:
-                ticket.stage_id = archived_stage.id
-                
-            ticket.active = False  # هذا سيخفي التذكرة تلقائياً بفضل ميزة الأرشيف المدمجة
-            ticket.wait_archive = False
-            ticket.archive_date = fields.Datetime.now()
+            if not ticket.wait_archive:
+                raise UserError(_("هذه المذكرة ليست في حالة انتظار أرشفة."))
             
+            # البحث عن المرحلة السابقة (يمكن تعديل هذا المنطق حسب احتياجاتك)
+            previous_stage = self.env['docflex.ticket.stage'].search([
+                ('sequence', '<', ticket.stage_id.sequence),
+                ('code', 'not in', ['archiving', 'archived'])
+            ], order='sequence desc', limit=1)
+            
+            if not previous_stage:
+                previous_stage = self.env['docflex.ticket.stage'].search([
+                    ('is_starting', '=', True)
+                ], limit=1)
+            
+            ticket.with_context(cancel_archive=True).write({
+                'stage_id': previous_stage.id if previous_stage else ticket.stage_id.id,
+                'wait_archive': False,
+                'request_archive_by': False,
+                'request_archive_date': False,
+            })
+
+            # تسجيل في المحادثات
             ticket.message_post(
-                body=_("✅ تمت أرشفة المذكرة بواسطة: <b>%s</b> في <i>%s</i>") % (
+                body=_("❌ تم إلغاء طلب الأرشفة بواسطة: <b>%s</b> في <i>%s</i>") % (
                     self.env.user.name,
                     fields.Datetime.now().strftime('%Y-%m-%d %H:%M')
                 )
             )
 
-    def action_unarchive(self):
-        # البحث عن المرحلة الأولى (جديد)
-        new_stage = self.env['docflex.ticket.stage'].search(
-            [('sequence', '=', 1)], 
+    def action_archive(self):
+        archived_stage = self.env['docflex.ticket.stage'].search(
+            [('code', '=', 'archived')], 
             limit=1
         )
-        
+        if not archived_stage:
+            raise ValidationError(_("لم يتم العثور على مرحلة 'مؤرشف'. تأكد من أن لها الكود: archived"))
+
+        # استخدم super() لتجاوز أي قيود في write()
+        super(DoflexTicket, self).with_context(do_archive=True).write({
+            'stage_id': archived_stage.id,
+            'active': False,
+            'wait_archive': False,  # تأكد من تعطيل انتظار الأرشفة
+            'archive_date': fields.Datetime.now(),
+        })
+
+        self.message_post(
+            body=_("✅ تمت أرشفة المذكرة بواسطة: <b>%s</b> في <i>%s</i>") % (
+                self.env.user.name,
+                fields.Datetime.now().strftime('%Y-%m-%d %H:%M')
+            )
+        )
+
+    def action_unarchive(self):
+        """استرجاع المذكرة من الأرشيف وتعيين المرحلة إلى جديدة"""
+        new_stage = self.env['docflex.ticket.stage'].search([('code', '=', 'new')], limit=1)
+
+        if not new_stage:
+            raise UserError(_("لا يمكن الاسترجاع لأن المرحلة (جديدة) غير معرفة. تأكد من أن لها الكود: new"))
+
         for ticket in self:
-            if new_stage:
-                ticket.stage_id = new_stage.id
-                
-            ticket.active = True  # هذا سيعيد إظهار التذكرة
-            ticket.wait_archive = False
-            ticket.archive_date = False
-            
+            if ticket.active:
+                raise UserError(_("المذكرة بالفعل غير مؤرشفة."))
+
+            ticket.with_context(allow_unarchive=True).write({
+                'stage_id': new_stage.id,
+                'active': True,
+                'wait_archive': False,
+                'archive_date': False,
+            })
+
             ticket.message_post(
                 body=_("🔄 تم استرجاع المذكرة من الأرشيف بواسطة: <b>%s</b>") % self.env.user.name
             )
-
 
     @api.depends('ticket_date')
     def _compute_ticket_month(self):

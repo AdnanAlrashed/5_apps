@@ -9,16 +9,22 @@
                     <field name="stage_id" widget="statusbar_duration" options="{'clickable': '1', 'fold_field': 'fold'}"/>
     
                     <!-- في جزء header -->
+                    
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
                     <button name="action_mark_waiting_archive" type="object" string="طلب أرشفة" class="btn btn-outline-secondary"
-                        invisible="not active or wait_archive  or user_id != uid" />
+                        invisible="not active or wait_archive or user_id != uid" />
+                    
+                    <button name="action_cancel_archive_request" type="object" string="إلغاء طلب الأرشفة" class="btn btn-outline-warning"
+                        invisible="not wait_archive or not active"/>
                         
                     <button name="action_archive" type="object" string="أرشفة الآن" class="btn btn-outline-danger"
                         invisible="not wait_archive or not active" groups="docflex.group_department_manager"/>
                         
                     <button name="action_unarchive" type="object" string="استرجاع من الأرشيف" class="btn btn-outline-primary"
                         invisible="active" groups="docflex.group_department_manager"/>
-                </header>
-                <sheet>
+                </div>
                     <field name="legend_blocked" invisible="1"/>
                     <field name="legend_normal" invisible="1"/>
                     <field name="legend_done" invisible="1"/>
@@ -42,7 +48,7 @@
                             
                             <h1 class="d-flex flex-row align-items-center">
                                 <field name="name" options="{'line_breaks': False}" widget="text" class="field_name" placeholder="e.g. Product arrived damaged"
-                                    required="True" style="font-size: min(4vw, 2.6rem);"/>
+                                    required="True" style="font-size: min(4vw, 2.6rem);" readonly="is_archived"/>
                             </h1>
                             <h2><field name="number"/></h2>
                         </div>
@@ -53,6 +59,7 @@
                             <field name="ticket_section_id" />
                             <field name="ticket_date" />
                             <field name="is_urgent" />
+                            <field name="is_archived" invisible="1" />
                         </group>
                         <group>
                             
@@ -87,7 +94,7 @@
                         </group>
                        
                         <group>
-                            <field name="ticket_security_id" />
+                            <field name="ticket_security_id" readonly="is_archived" />
                             <!-- widget="priority" -->
                             <field name="ticket_priority_id" />
                         </group>

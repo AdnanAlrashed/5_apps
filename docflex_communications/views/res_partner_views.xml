@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <record id="view_partner_form_inherit_docflex" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit.docflex</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="priority" eval="9"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button class="oe_stat_button" type="object"
+                    groups="docflex.docflex_super_manager_group"
+                    name="action_open_docflex_ticket" context="{'default_partner_id': id }" icon="fa-life-ring" invisible="ticket_count == 0">
+                    <div class="o_stat_info">
+                        <field name="ticket_count" class="o_stat_value"/>
+                        <span class="o_stat_text">Department Tickets</span>
+                    </div>
+                </button>
+            </div>
+            <field name="industry_id" position="after">
+                <t groups="docflex.docflex_super_manager_group">
+                    <field name="department_id"   context="{'with_department_name': True}"/>
+                    <!-- <field name="is_department" /> -->
+                    <!-- <field name="department_name" /> -->
+                </t>
+            </field>
+        </field>
+    </record>
+
+</odoo>

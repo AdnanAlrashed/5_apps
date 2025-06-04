@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<odoo>
+<odoo noupdate="1">
     <!-- 1. add category or model name -->
     <record id="medule_category_docflex" model="ir.module.category">
         <field name="name">DocFlex</field>

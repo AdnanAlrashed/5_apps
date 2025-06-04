@@ -28,6 +28,7 @@
     # always loaded
     'data': [
         'data/data.xml',
+        'data/referral_type_data.xml',
         'data/email_templates.xml',
         'security/docflex_security.xml',
         'security/ir_rules.xml',

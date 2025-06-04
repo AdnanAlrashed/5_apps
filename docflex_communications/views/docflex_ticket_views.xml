@@ -9,10 +9,35 @@
                     <field name="stage_id" widget="statusbar_duration" options="{'clickable': '1', 'fold_field': 'fold'}"/>
     
                     <!-- في جزء header -->
+                    <button name="action_refer_ticket" 
+                        type="object" 
+                        string="إحالة المذكرة" 
+                        class="btn-primary"
+                        groups="docflex_communications.group_department_manager"/>
+
+                <button name="action_view_referrals" 
+                        type="object" 
+                        string="عرض سجل الإحالات" 
+                        class="btn-secondary"/>
+
+                <field name="referral_count" widget="statinfo" 
+                    string="عدد الإحالات" 
+                    invisible="not referral_count"/>
                     
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
+                        <button name="action_refer_ticket" 
+                                string="إحالة إلى إدارة أخرى"
+                                type="object"
+                                class="oe_highlight"
+                                groups="base.group_user"/>
+                        <button class="oe_stat_button" 
+                                name="action_view_referrals" 
+                                type="object"
+                                icon="fa-exchange">
+                            <field string="الإحالات" name="referral_count" widget="statinfo"/>
+                        </button>
                         <button name="action_mark_waiting_archive" type="object" string="طلب أرشفة" class="btn btn-outline-secondary"
                             invisible="not active or wait_archive or user_id != uid" />
                         
@@ -167,6 +192,35 @@
                                     options="{'no_create': True, 'no_open': True}"/>
                             </group>
                         </page> -->
+                        <page string="سجل الإحالات" name="referrals">
+                            <field name="referral_ids" mode="tree,form">
+                                <tree>
+                                    <field name="referral_date"/>
+                                    <field name="from_user_id"/>
+                                    <field name="to_user_id"/>
+                                    <field name="to_department_id"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="deadline"/>
+                                    <field name="is_urgent"/>
+                                    <field name="referral_type_id" widget="many2one_avatar"/>
+                                </tree>
+                                <form>
+                                    <group>
+                                        <field name="referral_date" readonly="1"/>
+                                        <field name="from_user_id" readonly="1"/>
+                                        <field name="to_user_id" readonly="1"/>
+                                        <field name="to_department_id" readonly="1"/>
+                                        <field name="state" readonly="1"/>
+                                        <field name="deadline" readonly="1"/>
+                                        <field name="is_urgent" readonly="1"/>
+                                        <field name="notes" readonly="1"/>
+                                        <field name="response" readonly="1"/>
+                                        <field name="response_date" readonly="1"/>
+                                        <field name="referral_type_id" options="{'no_create': True}"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
                     </notebook>
                 </sheet>
                 <div class="oe_chatter">
@@ -256,6 +310,29 @@
                     <filter name="group_by_week" string="حسب الأسبوع" context="{'group_by': 'ticket_week'}"/>
                 </group>
             </search>
+        </field>
+    </record>
+
+    <record id="view_referral_wizard_form" model="ir.ui.view">
+        <field name="name">docflex.ticket.referral.wizard.form</field>
+        <field name="model">docflex.ticket.referral.wizard</field>
+        <field name="arch" type="xml">
+            <form string="إحالة المذكرة">
+                <sheet>
+                    <group>
+                        <field name="referral_type_id" options="{'no_create': True}" string="نوع الإجراء"/>
+                        <field name="to_user_id"/>
+                        <field name="to_department_id"/>
+                        <field name="deadline"/>
+                        <field name="is_urgent"/>
+                        <field name="notes" placeholder="أضف ملاحظاتك هنا..."/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_refer" string="إحالة" type="object" class="btn-primary"/>
+                    <button string="إلغاء" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
         </field>
     </record>
 
@@ -414,6 +491,17 @@
         </field>
     </record>
 
+    <record id="action_ticket_referrals" model="ir.actions.act_window">
+        <field name="name">إحالات المذكرات</field>
+        <field name="res_model">docflex.ticket.referral</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">لا توجد إحالات</p>
+        </field>
+    </record>
+
+    
+
     <menuitem id="docflex_main_menue" name="DocFlex Communications" web_icon="docflex_communications,static/src/img/doc.png" sequence="1"/>
     <menuitem id="docflex_config_menue" name="التهيئة" parent="docflex_main_menue" sequence="4"/>
     <menuitem id="docflex_ticket_menue" name="العمليات" parent="docflex_main_menue" sequence="4"/>
@@ -431,5 +519,12 @@
         action="action_outgoing_memos"
         groups="docflex_communications.docflex_super_manager_group"
         sequence="2"/>
+
+    <menuitem id="menu_ticket_referrals" 
+            name="إحالات المذكرات" 
+            parent="docflex_ticket_menue" 
+            action="action_ticket_referrals"
+            groups="docflex_communications.docflex_super_manager_group"
+            sequence="3"/>
 
 </odoo>

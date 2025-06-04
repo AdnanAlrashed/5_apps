@@ -1,0 +1,25 @@
+<odoo>
+    <data noupdate="1">
+        <record id="referral_type_review" model="referral.type">
+            <field name="name">مراجعة</field>
+            <field name="code">review</field>
+            <field name="is_default">True</field>
+            <field name="default_deadline_days">3</field>
+            <field name="description">إحالة للمراجعة والتقييم</field>
+        </record>
+        
+        <record id="referral_type_approval" model="referral.type">
+            <field name="name">موافقة</field>
+            <field name="code">approval</field>
+            <field name="default_deadline_days">5</field>
+            <field name="description">إحالة لطلب الموافقة الرسمية</field>
+        </record>
+        
+        <record id="referral_type_info" model="referral.type">
+            <field name="name">استعلام</field>
+            <field name="code">info</field>
+            <field name="default_deadline_days">2</field>
+            <field name="description">إحالة لطلب معلومات أو توضيحات</field>
+        </record>
+    </data>
+</odoo>

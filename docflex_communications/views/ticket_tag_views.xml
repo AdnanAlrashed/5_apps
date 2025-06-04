@@ -41,6 +41,6 @@
           </p>
         </field>
     </record>
-    <menuitem id="docflex_ticket_tag_menu" name="علامات التصنيف" parent="docflex_config_menue" action="docflex.docflex_ticket_tag_action" groups="docflex.docflex_super_manager_group" sequence="1"/>
+    <menuitem id="docflex_ticket_tag_menu" name="علامات التصنيف" parent="docflex_config_menue" action="docflex_communications.docflex_ticket_tag_action" groups="docflex_communications.docflex_super_manager_group" sequence="1"/>
 
 </odoo>

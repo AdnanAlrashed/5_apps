@@ -179,6 +179,97 @@ class DoflexTicket(models.Model):
     restored_date = fields.Datetime(string="تاريخ الاسترجاع", readonly=True)
     restored_by = fields.Many2one('res.users', string="تم الاسترجاع بواسطة", readonly=True)
 
+    referral_delay = fields.Integer(
+    string='تأخير الإحالة (أيام)',
+    compute='_compute_referral_delay'
+    )
+    referral_response_rate = fields.Float(
+        string='معدل الاستجابة للإحالات %',
+        compute='_compute_referral_response_rate'
+    )
+    # Many2many field for ticket referrals
+    referral_ids = fields.One2many(
+    'docflex.ticket.referral', 
+    'ticket_id', 
+    string='سجل الإحالات'
+    )
+    current_referral_id = fields.Many2one(
+        'docflex.ticket.referral',
+        string='الإحالة الحالية',
+        compute='_compute_current_referral',
+        store=True
+    )
+    referral_count = fields.Integer(
+        string='عدد الإحالات',
+        compute='_compute_referral_count'
+    )
+
+    @api.depends('referral_ids')
+    def _compute_current_referral(self):
+        for ticket in self:
+            ticket.current_referral_id = ticket.referral_ids.sorted('referral_date', reverse=True)[:1]
+
+    @api.depends('referral_ids')
+    def _compute_referral_count(self):
+        for ticket in self:
+            ticket.referral_count = len(ticket.referral_ids)
+
+    def action_refer_ticket(self):
+        return {
+            'name': _('إحالة المذكرة'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'docflex.ticket.referral',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_ticket_id': self.id,
+                'default_from_user_id': self.env.user.id,
+            }
+        }
+
+    def action_view_referrals(self):
+        action = self.env.ref('docflex_communications.action_ticket_referrals').read()[0]
+        action['domain'] = [('ticket_id', '=', self.id)]
+        return action
+
+    def action_accept_referral(self):
+        self.ensure_one()
+        if self.current_referral_id:
+            self.current_referral_id.write({
+                'state': 'received',
+                'response_date': fields.Datetime.now()
+            })
+            self.message_post(body=_("تم استلام الإحالة من %s") % self.current_referral_id.from_user_id.name)
+
+    def action_reject_referral(self):
+        self.ensure_one()
+        return {
+            'name': _('رفض الإحالة'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'docflex.referral.reject.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_referral_id': self.current_referral_id.id,
+            }
+        }
+
+    @api.depends('referral_ids.response_date', 'referral_ids.referral_date')
+    def _compute_referral_delay(self):
+        for ticket in self:
+            delays = []
+            for referral in ticket.referral_ids.filtered(lambda r: r.response_date):
+                delta = referral.response_date - referral.referral_date
+                delays.append(delta.days)
+            ticket.referral_delay = sum(delays) / len(delays) if delays else 0
+
+    @api.depends('referral_ids.state')
+    def _compute_referral_response_rate(self):
+        for ticket in self:
+            total = len(ticket.referral_ids)
+            responded = len(ticket.referral_ids.filtered(lambda r: r.state in ['received', 'processed', 'rejected']))
+            ticket.referral_response_rate = (responded / total * 100) if total > 0 else 0
+
     @api.depends('stage_id')
     def _compute_is_archived(self):
         for record in self:
@@ -587,7 +678,7 @@ class DoflexTicket(models.Model):
     def _get_default_stage(self):
         stage = self.env['docflex.ticket.stage'].search([], order='sequence asc', limit=1)
         if not stage:
-            template = self.env.ref('docflex.email_template_docflex_ticket_default', raise_if_not_found=False)
+            template = self.env.ref('docflex_communications.email_template_docflex_ticket_default', raise_if_not_found=False)
             stage = self.env['docflex.ticket.stage'].create({
                 'name': 'جديد',
                 'sequence': 1,
@@ -668,7 +759,7 @@ class DoflexTicket(models.Model):
 
     def action_open_docflex_ticket(self):
         self.ensure_one()
-        action = self.env["ir.actions.actions"]._for_xml_id("docflex.docflex_ticket_action_main_tree")
+        action = self.env["ir.actions.actions"]._for_xml_id("docflex_communications.docflex_ticket_action_main_tree")
         action.update({
             'domain': [('stage_id', 'in', self.ids)],
             'context': {

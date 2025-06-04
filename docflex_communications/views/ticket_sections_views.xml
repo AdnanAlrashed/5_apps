@@ -57,7 +57,7 @@
         <field name="domain">[("id", "!=", False)]</field>  
 
     </record>
-    <menuitem id="docflex_ticket_sections_menu" name="اقسام المذكرات" parent="docflex_config_menue" action="docflex.action_docflex_ticket_sections" groups="docflex.docflex_super_manager_group" sequence="1"/>
+    <menuitem id="docflex_ticket_sections_menu" name="اقسام المذكرات" parent="docflex_config_menue" action="docflex_communications.action_docflex_ticket_sections" groups="docflex_communications.docflex_super_manager_group" sequence="1"/>
 
 
 </odoo>

@@ -19,3 +19,5 @@ from . import ticket_status
 from . import ticket_asset
 from . import docflex_ticket
 from . import ticket_attachment
+from . import referral_types
+from . import referral_wizard

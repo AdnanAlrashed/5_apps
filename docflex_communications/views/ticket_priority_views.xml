@@ -53,7 +53,7 @@
         </field>
         <field name="domain">[("id", "!=", False)]</field> 
     </record>
-    <menuitem id="docflex_ticket_priority_menu" name="اولوليات المذكرات" parent="docflex_config_menue" action="docflex.action_docflex_ticket_priority" groups="docflex.docflex_super_manager_group" sequence="1"/>
+    <menuitem id="docflex_ticket_priority_menu" name="اولوليات المذكرات" parent="docflex_config_menue" action="docflex_communications.action_docflex_ticket_priority" groups="docflex_communications.docflex_super_manager_group" sequence="1"/>
 
 
 </odoo>

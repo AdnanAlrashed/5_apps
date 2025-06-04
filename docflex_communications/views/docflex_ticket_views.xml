@@ -20,10 +20,10 @@
                             invisible="not wait_archive or not active"/>
                             
                         <button name="action_archive" type="object" string="أرشفة الآن" class="btn btn-outline-danger"
-                            invisible="not wait_archive or not active" groups="docflex.group_department_manager"/>
+                            invisible="not wait_archive or not active" groups="docflex_communications.group_department_manager"/>
                             
                         <button name="action_unarchive" type="object" string="استرجاع من الأرشيف" class="btn btn-outline-primary"
-                            invisible="active" groups="docflex.group_department_manager"/>
+                            invisible="active" groups="docflex_communications.group_department_manager"/>
                         
                         <button class="oe_stat_button"
                                 name="action_force_sync_documents"
@@ -244,7 +244,7 @@
                 <filter name="my_tickets" string="مذكراتي" domain="[('user_id','=',uid)]"/>
                 <filter name="my_department_tickets" string="مذكرات إدارتي" 
                     domain="['|', ('department_id','=',False), ('department_id.manager_id.user_id','=',uid)]"
-                    groups="docflex.group_department_manager"/>
+                    groups="docflex_communications.group_department_manager"/>
                 <!-- <filter name="company_tickets" string="مذكرات شركتي" 
                     domain="[('company_id','=',user.company_id.id)]"
                     groups="base.group_multi_company"/> -->
@@ -414,7 +414,7 @@
         </field>
     </record>
 
-    <menuitem id="docflex_main_menue" name="الاتصالات الادارية" web_icon="docflex,static/src/img/ticket.png" sequence="1"/>
+    <menuitem id="docflex_main_menue" name="DocFlex Communications" web_icon="docflex_communications,static/src/img/doc.png" sequence="1"/>
     <menuitem id="docflex_config_menue" name="التهيئة" parent="docflex_main_menue" sequence="4"/>
     <menuitem id="docflex_ticket_menue" name="العمليات" parent="docflex_main_menue" sequence="4"/>
 
@@ -422,14 +422,14 @@
         name="المذكرات الواردة"
         parent="docflex_ticket_menue"
         action="action_incoming_memos"
-        groups="docflex.docflex_super_manager_group"
+        groups="docflex_communications.docflex_super_manager_group"
         sequence="1"/>
 
     <menuitem id="menu_outgoing_memos"
         name="المذكرات الصادره"
         parent="docflex_ticket_menue"
         action="action_outgoing_memos"
-        groups="docflex.docflex_super_manager_group"
+        groups="docflex_communications.docflex_super_manager_group"
         sequence="2"/>
 
 </odoo>

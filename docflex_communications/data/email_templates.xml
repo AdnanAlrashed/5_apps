@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="email_template_docflex_ticket_default" model="mail.template">
+        <field name="name">Default DocFlex Ticket Notification</field>
+        <field name="model_id" ref="model_docflex_ticket"/>
+        <field name="subject">New Ticket: ${object.number}</field>
+        <field name="email_from">${object.company_id.email or 'noreply@yourcompany.com'}</field>
+        <field name="email_to">${object.partner_from_id.email or ''}</field>
+        <field name="lang">${object.partner_from_id.lang or 'en_US'}</field>
+        <field name="body_html"><![CDATA[
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #875A7B;">New Ticket Created</h2>
+                <p>Dear ${object.partner_from_id.name or 'Customer'},</p>
+                
+                <p>A new ticket has been created with the following details:</p>
+                
+                <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Ticket Number</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">${object.number}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Subject</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">${object.name}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Date</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">${object.ticket_date}</td>
+                    </tr>
+                </table>
+                
+                <p>You can view the ticket by clicking the link below:</p>
+                <div style="text-align: center; margin: 20px 0;">
+                    <a href="${object.get_base_url()}/web#id=${object.id}&model=docflex.ticket&view_type=form" 
+                       style="background-color: #875A7B; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                        View Ticket
+                    </a>
+                </div>
+                
+                <p style="font-size: 0.9em; color: #777;">
+                    This is an automated message. Please do not reply directly to this email.
+                </p>
+            </div>
+        ]]></field>
+    </record>
+</odoo>

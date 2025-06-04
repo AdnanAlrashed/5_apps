@@ -156,7 +156,7 @@
                         </page> -->
                         <page string="إعدادات المستندات" name="documents_settings" groups="base.group_multi_company">
                             <group>
-                                <field name="documents_folder_id" 
+                                <field name="documents_folder_id" readonly="1"
                                     options="{'no_create': True, 'no_open': True}"/>
                                 
                             </group>

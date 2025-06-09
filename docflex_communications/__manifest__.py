@@ -44,6 +44,7 @@
         'views/ticket_security_views.xml',
         'views/docflex_ticket_stage_views.xml',
         'views/res_partner_views.xml',
+        'views/referral_views.xml',
         'views/templates.xml',
     ],
     # only loaded in demonstration mode

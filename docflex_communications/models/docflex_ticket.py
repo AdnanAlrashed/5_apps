@@ -1,16 +1,17 @@
 from odoo import models , fields, api ,Command, _
 from odoo.exceptions import ValidationError, UserError
+from datetime import timedelta
 class DoflexTicket(models.Model):
     _name = 'docflex.ticket'
     # _inherit="helpdesk.ticket"
     _inherit = [
-        'portal.mixin',
-        'mail.thread.cc',
-        'utm.mixin',
-        'rating.mixin',
-        'mail.activity.mixin',
-        'mail.tracking.duration.mixin',
-        'ir.attachment',
+        'portal.mixin',                # لدعم البوابة
+        'mail.thread.cc',              # لتتبع التغييرات عبر الشات
+        'utm.mixin',                   # لتتبع الحملات (غير مستخدم فعليًا هنا)
+        'rating.mixin',                # لدعم التقييمات
+        'mail.activity.mixin',         # لدعم الأنشطة المجدولة
+        'mail.tracking.duration.mixin',# لتتبع مدة المراحل
+        'ir.attachment',               # لربط المرفقات مباشرة بالنموذج
     ]
     
   
@@ -199,6 +200,11 @@ class DoflexTicket(models.Model):
         compute='_compute_current_referral',
         store=True
     )
+    current_referral_state = fields.Selection(
+    related='current_referral_id.state',
+    string="حالة الإحالة الحالية",
+    store=True
+)
     referral_count = fields.Integer(
         string='عدد الإحالات',
         compute='_compute_referral_count'
@@ -207,7 +213,7 @@ class DoflexTicket(models.Model):
     @api.depends('referral_ids')
     def _compute_current_referral(self):
         for ticket in self:
-            ticket.current_referral_id = ticket.referral_ids.sorted('referral_date', reverse=True)[:1]
+            ticket.current_referral_id = ticket.referral_ids.sorted('referral_date', reverse=True)[:1] if ticket.referral_ids else False
 
     @api.depends('referral_ids')
     def _compute_referral_count(self):
@@ -218,7 +224,7 @@ class DoflexTicket(models.Model):
         return {
             'name': _('إحالة المذكرة'),
             'type': 'ir.actions.act_window',
-            'res_model': 'docflex.ticket.referral',
+            'res_model': 'docflex.ticket.referral.wizard',
             'view_mode': 'form',
             'target': 'new',
             'context': {
@@ -233,13 +239,47 @@ class DoflexTicket(models.Model):
         return action
 
     def action_accept_referral(self):
+        """
+        حدث استلام الإحالات
+        """
         self.ensure_one()
-        if self.current_referral_id:
-            self.current_referral_id.write({
-                'state': 'received',
-                'response_date': fields.Datetime.now()
-            })
-            self.message_post(body=_("تم استلام الإحالة من %s") % self.current_referral_id.from_user_id.name)
+        if not self.current_referral_id:
+            raise UserError(_("لا توجد إحالة حالية لقبولها"))
+        
+        if self.current_referral_id.state != 'pending':
+            raise UserError(_("لا يمكن قبول إحالة غير معلقة"))
+        
+        # تحديث حالة الإحالة
+        self.current_referral_id.write({
+            'state': 'received',
+            'response_date': fields.Datetime.now(),
+            'response': _("تم استلام الإحالة")
+        })
+        
+        # إرسال إشعار للمرسل
+        self.message_post(
+            body=_("""<div style='margin:10px;'>
+                <h3 style='color:#4CAF50;'>تم استلام الإحالة</h3>
+                <p><b>بواسطة:</b> %s</p>
+                <p><b>التاريخ:</b> %s</p>
+            </div>""") % (
+                self.env.user.name,
+                fields.Datetime.now().strftime('%Y-%m-%d %H:%M')
+            ),
+            partner_ids=[self.current_referral_id.from_user_id.partner_id.id],
+            subject=_("استلام الإحالة - %s") % self.number
+        )
+        
+        # إنشاء نشاط متابعة
+        self.activity_schedule(
+            'mail.mail_activity_data_todo',
+            summary=_('متابعة الإحالة المستلمة'),
+            note=_('يرجى متابعة الإحالة المستلمة من %s') % self.current_referral_id.from_user_id.name,
+            user_id=self.env.user.id,
+            date_deadline=fields.Date.today() + timedelta(days=3)
+        )
+        
+        return True
 
     def action_reject_referral(self):
         self.ensure_one()
@@ -285,48 +325,20 @@ class DoflexTicket(models.Model):
                 if rec.stage_id.code not in allowed_codes:
                     raise ValidationError(_("لا يمكن تغيير مرحلة مذكرة بانتظار الأرشفة إلا إلى 'مؤرشف'."))
     
-    # def write(self, vals):
-    #     for ticket in self:
-    #         stage_code = ticket.stage_id.code if ticket.stage_id else False
-
-    #         # الحالات المسموح بها لتعديل المذكرة في مراحل الأرشفة:
-    #         is_unarchiving = (
-    #             self.env.context.get('allow_unarchive') and
-    #             vals.get('active') is True and
-    #             'stage_id' in vals
-    #         )
-
-    #         is_requesting_archive = (
-    #             self.env.context.get('request_archive') and
-    #             vals.get('wait_archive') is True and
-    #             'stage_id' in vals
-    #         )
-
-    #         is_archiving = (
-    #             self.env.context.get('do_archive') and
-    #             vals.get('active') is False and
-    #             vals.get('wait_archive') is False  # تأكد أن wait_archive يتم تعطيله
-    #         )
-
-    #         # لا تمنع التعديل إذا كانت المذكرة في مرحلة "انتظار الأرشفة" (archiving) 
-    #         # ويتم تنفيذ عملية أرشفة فعلية (is_archiving = True)
-    #         if stage_code == 'archived' and not (is_unarchiving or is_requesting_archive or is_archiving):
-    #             raise ValidationError(_("لا يمكن تعديل المذكرة المؤرشفة إلا عند الاسترجاع."))
-            
-    #         if stage_code == 'archiving' and not (is_requesting_archive or is_archiving):
-    #             raise ValidationError(_("لا يمكن تعديل المذكرة في انتظار الأرشفة إلا عند تنفيذ الأرشفة أو إلغاء الطلب."))
-
-    #         result = super().write(vals)
-
-    #         # تحديث المرحلة إلى "مؤرشف" إذا تم تعطيل المذكرة
-    #         if 'active' in vals and vals['active'] is False:
-    #             archived_stage = self.env['docflex.ticket.stage'].search([('code', '=', 'archived')], limit=1)
-    #             if archived_stage:
-    #                 super(DoflexTicket, self).write({'stage_id': archived_stage.id})
-
-    #     return result
 
     def write(self, vals):
+
+        """
+            تعديل المذكرة:
+            - يمنع التعديل إذا كانت المذكرة مؤرشفة أو بانتظار الأرشفة إلا في سياقات مخصصة.
+            - يتعامل مع أربع حالات خاصة:
+                - unarchive (استرجاع)
+                - archive request (طلب أرشفة)
+                - archive (تنفيذ الأرشفة)
+                - cancel (إلغاء طلب الأرشفة)
+            - في حالة تعطيل المذكرة (active=False)، يتم تلقائيًا تعيين المرحلة إلى "مؤرشف".
+        """
+
         for ticket in self:
             stage_code = ticket.stage_id.code if ticket.stage_id else False
 
@@ -416,7 +428,14 @@ class DoflexTicket(models.Model):
 
 
     def action_mark_waiting_archive(self):
-        """زر لطلب أرشفة المذكرة"""
+        """
+        زر لطلب أرشفة المذكرة:
+        - ينقل المذكرة إلى مرحلة 'جاري الأرشفة' (code='archiving')
+        - يعيّن الحقل `wait_archive = True`
+        - يسجل المستخدم وتاريخ الطلب
+        - يسجل إشعارًا في سجل المذكرة
+        - يرسل تنبيهًا إلى مدير الإدارة (إن وُجد)
+        """
 
         waiting_stage = self.env['docflex.ticket.stage'].search(
             [('code', '=', 'archiving')],  # تأكد أن المرحلة لها code ثابت = archiving
@@ -466,7 +485,13 @@ class DoflexTicket(models.Model):
                 )
 
     def action_cancel_archive_request(self):
-        """إلغاء طلب الأرشفة وإعادة المذكرة إلى المرحلة السابقة"""
+        """
+        زر لإلغاء طلب الأرشفة:
+        - يعيد المذكرة إلى المرحلة السابقة إن وُجدت.
+        - يعطّل الحقل wait_archive
+        - يحذف المستخدم/تاريخ طلب الأرشفة
+        - يسجل إشعارًا في سجل المذكرة
+        """
         for ticket in self:
             if not ticket.wait_archive:
                 raise UserError(_("هذه المذكرة ليست في حالة انتظار أرشفة."))
@@ -477,6 +502,7 @@ class DoflexTicket(models.Model):
                 ('code', 'not in', ['archiving', 'archived'])
             ], order='sequence desc', limit=1)
             
+            # fallback إلى المرحلة الابتدائية إن لم توجد سابقة
             if not previous_stage:
                 previous_stage = self.env['docflex.ticket.stage'].search([
                     ('is_starting', '=', True)
@@ -498,6 +524,16 @@ class DoflexTicket(models.Model):
             )
 
     def action_archive(self):
+
+        """
+        ينفذ عملية الأرشفة النهائية:
+        - ينقل المذكرة إلى مرحلة 'مؤرشف'
+        - يعطلها (active = False)
+        - يلغي انتظار الأرشفة (wait_archive = False)
+        - يسجل التاريخ في archive_date
+        - يسجل إشعارًا في سجل المذكرة
+        """
+
         archived_stage = self.env['docflex.ticket.stage'].search(
             [('code', '=', 'archived')], 
             limit=1
@@ -521,7 +557,14 @@ class DoflexTicket(models.Model):
         )
 
     def action_unarchive(self):
-        """استرجاع المذكرة من الأرشيف وتعيين المرحلة إلى جديدة"""
+        """
+        استرجاع المذكرة من الأرشيف:
+        - يعيد تفعيلها (active=True)
+        - يعيدها إلى المرحلة الابتدائية (code='new')
+        - يعطل الحقل wait_archive
+        - يسجل تاريخ الاسترجاع
+        - يسجل إشعارًا في سجل المذكرة
+        """
         new_stage = self.env['docflex.ticket.stage'].search([('code', '=', 'new')], limit=1)
 
         if not new_stage:
@@ -690,7 +733,16 @@ class DoflexTicket(models.Model):
     
     @api.model
     def create(self, vals):
-        # 1. تعيين معلومات المستخدم
+        """
+            إنشاء مذكرة جديدة:
+            - يعين المستخدم الحالي كمنشئ للمذكرة.
+            - يربط المذكرة بقسم المستخدم (مطلوب).
+            - يعين المرحلة الابتدائية إذا لم تُحدد.
+            - يولّد الرقم التسلسلي تلقائيًا إذا كان 'New'.
+            - يتحقق من وجود الحقول الأساسية (ticket_type, ticket_section_id).
+            - يسجل في سجل المذكرة + يرسل بريد إن وُجد قالب مرتبط بالمرحلة.
+        """
+
         user = self.env.user
         vals.update({
             'user_id': user.id,

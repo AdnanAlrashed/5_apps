@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <!-- docflex ticket tree -->
+    <record id="view_docflex_referral_tree_view" model="ir.ui.view">
+        <field name="name">docflex.referral.tree.view</field>
+        <field name="model">docflex.ticket.referral</field>
+        <field name="arch" type="xml">
+        <tree>
+            
+            <field name="referral_date"/>
+            <field name="from_user_id"/>
+            <field name="to_user_id"/>
+            <field name="to_department_id"/>
+            <field name="state" widget="badge"/>
+            <field name="deadline"/>
+            <field name="is_urgent"/>
+            <field name="referral_type_id" widget="many2one_avatar"/>
+            <field name="referral_date" readonly="1"/>
+            <field name="from_user_id" readonly="1"/>
+            <field name="to_user_id" readonly="1"/>
+            <field name="to_department_id" readonly="1"/>
+            <field name="state" readonly="1"/>
+            <field name="deadline" readonly="1"/>
+            <field name="is_urgent" readonly="1"/>
+            <field name="notes" readonly="1"/>
+            <field name="response" readonly="1"/>
+            <field name="response_date" readonly="1"/>
+            <field name="referral_type_id" options="{'no_create': True}"/>
+        </tree>
+    </field>
+  </record>
+
+
+    
+
+
+</odoo>

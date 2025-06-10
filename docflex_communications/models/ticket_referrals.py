@@ -33,6 +33,13 @@ class DocflexTicketReferral(models.Model):
     response = fields.Text(string='رد على الإحالة')
     response_date = fields.Datetime(string='تاريخ الرد')
 
+    # في ticket_referrals.py
+    is_active_referral = fields.Boolean(
+        string="إحالة نشطة",
+        default=True,
+        help="تبين إذا كانت هذه الإحالة تمنع التعديل على المذكرة"
+    )
+
     # دالة للحصول على نوع الإجراء الافتراضي
     @api.model
     def _get_default_referral_type(self):

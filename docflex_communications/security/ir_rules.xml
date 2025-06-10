@@ -29,7 +29,9 @@
         <field name="name">مدير القسم يرى جميع مذكرات قسمه</field>
         <field name="model_id" ref="model_docflex_ticket"/>
         <field name="domain_force">
-            [('department_id', '=', user.employee_id.department_id.id)]
+            ['|', ('department_id', '=', False),
+                '|', ('department_id', '=', user.department_id.id),
+                    ('department_id.parent_id', '=', user.department_id.id)]
         </field>
         <field name="groups" eval="[(4, ref('docflex_communications.group_department_manager'))]"/>
     </record>

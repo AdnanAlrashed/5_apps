@@ -30,19 +30,6 @@
                         <field name="current_referral_state" widget="badge" 
                             options="{'rejected': 'danger', 'received': 'success', 'pending': 'warning'}"
                             invisible="not current_referral_id"/>
-                        <button name="action_accept_referral"
-                            type="object" 
-                            string="استلام الإحالة" 
-                            class="btn-success"
-                            groups="base.group_user"
-                            invisible="not current_referral_id or current_referral_state != 'pending'"/>
-                                
-                        <button name="action_reject_referral" 
-                                type="object" 
-                                string="رفض الإحالة" 
-                                class="btn-danger"
-                                groups="base.group_user"
-                                invisible="not current_referral_id or current_referral_state != 'pending'"/>
 
                         <button name="action_refer_ticket" 
                                 string="إحالة إلى إدارة أخرى"
@@ -78,7 +65,7 @@
                             <field string="Documents" name="document_count" widget="statinfo"/>
                         </button>
                         
-                </div>
+                    </div>
                     
                     <field name="legend_blocked" invisible="1"/>
                     <field name="legend_normal" invisible="1"/>
@@ -93,6 +80,33 @@
                         title="في انتظار الأرشفة"
                         bg_color="text-bg-warning"
                         invisible="not wait_archive or not active"/>
+                        
+                    <field name="is_locked" invisible="1"/>
+                    <field name="lock_reason" invisible="1"/>
+                    <widget name="web_ribbon"
+                        title="مقفولة - يوجد إحالة نشطة"
+                        bg_color="text-bg-danger"
+                        invisible="not is_locked"
+                        />
+
+                    <!-- تحسين رسالة القفل -->
+                    <xpath expr="//field[@name='name']" position="before">
+                        <div class="alert alert-warning" invisible="not is_locked">
+                            <i class="fa fa-lock me-2"/> 
+                            <span>المذكرة مقفولة بسبب إحالة نشطة: </span>
+                            <field name="lock_reason" class="d-inline"/>
+                            <div class="mt-2">
+                                <span>للتعديل على المذكرة، يرجى </span>
+                                <button name="action_accept_referral" type="object" class="btn btn-sm btn-link p-0">
+                                    <u>استلام الإحالة</u>
+                                </button>
+                                <span> أو </span>
+                                <button name="action_reject_referral" type="object" class="btn btn-sm btn-link p-0">
+                                    <u>رفضها</u>
+                                </button>
+                            </div>
+                        </div>
+                    </xpath>
 
                     <field name="kanban_state" widget="state_selection"/>
                     <!-- <field name="use_sla" invisible="1"/> -->
@@ -210,32 +224,49 @@
                                     options="{'no_create': True, 'no_open': True}"/>
                             </group>
                         </page> -->
+                        <!-- في عرض نموذج التذكرة -->
                         <page string="سجل الإحالات" name="referrals">
                             <field name="referral_ids" mode="tree,form">
                                 <tree>
                                     <field name="referral_date"/>
+                                    <field name="referral_type_id" widget="many2one_avatar"/>
                                     <field name="from_user_id"/>
                                     <field name="to_user_id"/>
                                     <field name="to_department_id"/>
-                                    <field name="state" widget="badge"/>
+                                    <field name="state" widget="badge" decoration-danger="state == 'rejected'" 
+                                        decoration-success="state == 'received'" 
+                                        decoration-warning="state == 'pending'"/>
                                     <field name="deadline"/>
                                     <field name="is_urgent"/>
-                                    <field name="referral_type_id" widget="many2one_avatar"/>
                                 </tree>
                                 <form>
-                                    <group>
-                                        <field name="referral_date" readonly="1"/>
-                                        <field name="from_user_id" readonly="1"/>
-                                        <field name="to_user_id" readonly="1"/>
-                                        <field name="to_department_id" readonly="1"/>
-                                        <field name="state" readonly="1"/>
-                                        <field name="deadline" readonly="1"/>
-                                        <field name="is_urgent" readonly="1"/>
-                                        <field name="notes" readonly="1"/>
-                                        <field name="response" readonly="1"/>
-                                        <field name="response_date" readonly="1"/>
-                                        <field name="referral_type_id" options="{'no_create': True}"/>
-                                    </group>
+                                    <sheet>
+                                        <group>
+                                            <group>
+                                                <field name="referral_date" readonly="1"/>
+                                                <field name="referral_type_id" readonly="1"/>
+                                                <field name="from_user_id" readonly="1"/>
+                                            </group>
+                                            <group>
+                                                <field name="to_user_id" readonly="1"/>
+                                                <field name="to_department_id" readonly="1"/>
+                                                <field name="state" readonly="1"/>
+                                            </group>
+                                            <group>
+                                                <field name="deadline" readonly="1"/>
+                                                <field name="is_urgent" readonly="1"/>
+                                            </group>
+                                        </group>
+                                        <notebook>
+                                            <page string="ملاحظات الإحالة">
+                                                <field name="notes" readonly="1"/>
+                                            </page>
+                                            <page string="الرد على الإحالة">
+                                                <field name="response" readonly="1"/>
+                                                <field name="response_date" readonly="1"/>
+                                            </page>
+                                        </notebook>
+                                    </sheet>
                                 </form>
                             </field>
                         </page>
@@ -252,26 +283,26 @@
 
     
     <!-- docflex ticket tree -->
-  <record id="view_docflex_ticket_tree_view" model="ir.ui.view">
-    <field name="name">docflex.ticket.tree.view</field>
-    <field name="model">docflex.ticket</field>
-    <field name="arch" type="xml">
-      <tree>
-        <field name="name"/>
-        <field name="number"/>
-        <field name="ticket_date" optional="hide"/>
-        <field name="ticket_section_id" optional="show"/>
-        <field name="ticket_priority_id" optional="show"/>
-        <field name="ticket_security_id" optional="show"/>
-        <field name="ticket_status_id" optional="show"/>
-        <field name="kanban_state" nolabel="1" optional="show" widget="state_selection"/>
-        <field name="stage_id" optional="show"/>
-        <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="show"/>
-        <field name="user_id" optional="hide"/>
-        
-      </tree>
-    </field>
-  </record>
+    <record id="view_docflex_ticket_tree_view" model="ir.ui.view">
+        <field name="name">docflex.ticket.tree.view</field>
+        <field name="model">docflex.ticket</field>
+        <field name="arch" type="xml">
+        <tree>
+            <field name="name"/>
+            <field name="number"/>
+            <field name="ticket_date" optional="hide"/>
+            <field name="ticket_section_id" optional="show"/>
+            <field name="ticket_priority_id" optional="show"/>
+            <field name="ticket_security_id" optional="show"/>
+            <field name="ticket_status_id" optional="show"/>
+            <field name="kanban_state" nolabel="1" optional="show" widget="state_selection"/>
+            <field name="stage_id" optional="show"/>
+            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="show"/>
+            <field name="user_id" optional="hide"/>
+            
+        </tree>
+        </field>
+    </record>
 
   <!-- Search View Enhanced -->
     <record id="view_docflex_ticket_search" model="ir.ui.view">

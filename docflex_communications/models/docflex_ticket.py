@@ -210,6 +210,11 @@ class DoflexTicket(models.Model):
         compute='_compute_referral_count'
     )
 
+    is_locked = fields.Boolean(string="مقفولة", default=False)
+    lock_reason = fields.Text(string="سبب القفل")
+    lock_date = fields.Datetime(string="تاريخ القفل")
+    locked_by = fields.Many2one('res.users', string="مقفولة بواسطة")
+
     @api.depends('referral_ids')
     def _compute_current_referral(self):
         for ticket in self:
@@ -243,6 +248,13 @@ class DoflexTicket(models.Model):
         حدث استلام الإحالات
         """
         self.ensure_one()
+        self.write({
+        'is_locked': False,
+        'lock_reason': False,
+        'lock_date': False,
+        'locked_by': False
+    })
+    
         if not self.current_referral_id:
             raise UserError(_("لا توجد إحالة حالية لقبولها"))
         
@@ -283,6 +295,12 @@ class DoflexTicket(models.Model):
 
     def action_reject_referral(self):
         self.ensure_one()
+        self.write({
+        'is_locked': False,
+        'lock_reason': False,
+        'lock_date': False,
+        'locked_by': False
+    })
         return {
             'name': _('رفض الإحالة'),
             'type': 'ir.actions.act_window',
@@ -338,6 +356,9 @@ class DoflexTicket(models.Model):
                 - cancel (إلغاء طلب الأرشفة)
             - في حالة تعطيل المذكرة (active=False)، يتم تلقائيًا تعيين المرحلة إلى "مؤرشف".
         """
+        for record in self:
+            if record.is_locked and not self.env.context.get('bypass_lock'):
+                raise UserError(_("لا يمكن التعديل على المذكرة أثناء وجود إحالة نشطة. السبب: %s") % record.lock_reason)
 
         for ticket in self:
             stage_code = ticket.stage_id.code if ticket.stage_id else False
@@ -437,6 +458,10 @@ class DoflexTicket(models.Model):
         - يرسل تنبيهًا إلى مدير الإدارة (إن وُجد)
         """
 
+        self.ensure_one()
+        if self.is_locked:
+            raise UserError(_("لا يمكن طلب أرشفة مذكرة مقفولة بسبب إحالة نشطة"))
+
         waiting_stage = self.env['docflex.ticket.stage'].search(
             [('code', '=', 'archiving')],  # تأكد أن المرحلة لها code ثابت = archiving
             limit=1
@@ -533,6 +558,10 @@ class DoflexTicket(models.Model):
         - يسجل التاريخ في archive_date
         - يسجل إشعارًا في سجل المذكرة
         """
+
+        self.ensure_one()
+        if self.is_locked:
+            raise UserError(_("لا يمكن أرشفة مذكرة مقفولة بسبب إحالة نشطة"))
 
         archived_stage = self.env['docflex.ticket.stage'].search(
             [('code', '=', 'archived')], 

@@ -40,4 +40,14 @@
         <field name="category_id" ref="base.module_category_human_resources"/>
         <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/> -->
 
+    <!-- إنشاء مجموعة جديدة -->
+    <!-- تعريف مجموعة إحالات التذاكر -->
+    <record id="group_ticket_referral" model="res.groups">
+        <field name="name">إمكانية إحالة التذاكر</field>
+        <field name="category_id" ref="medule_category_docflex"/>
+        <field name="implied_ids" eval="[
+            (4, ref('docflex_manager_group')),
+        ]"/>
+    </record>
+
 </odoo>

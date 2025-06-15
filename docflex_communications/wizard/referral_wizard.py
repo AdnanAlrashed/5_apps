@@ -56,7 +56,28 @@ class DocflexTicketReferralWizard(models.TransientModel):
 
     def action_refer(self):
         self.ensure_one()
+        if not self.env.user.has_group('docflex_communications.group_ticket_referral'):
+            raise UserError(_("ليس لديك صلاحية إحالة المذكرات. الرجاء التواصل مع المدير."))
         
+        # التحقق من أن المستخدم لم يقم بإحالة المذكرة لنفسه
+        if self.to_user_id and self.to_user_id.id == self.env.user.id:
+            raise UserError(_("لا يمكنك إحالة المذكرة لنفسك!"))
+
+        # التحقق من وجود إحالة سابقة لنفس المستخدم
+        existing_referral = self.env['docflex.ticket.referral'].search([
+            ('ticket_id', '=', self.ticket_id.id),
+            ('from_user_id', '=', self.env.user.id),
+            ('to_user_id', '=', self.to_user_id.id if self.to_user_id else False),
+            ('to_department_id', '=', self.to_department_id.id if self.to_department_id else False),
+            ('state', 'in', ['pending', 'received'])
+        ], limit=1)
+        
+        if existing_referral:
+            raise UserError(_("لقد قمت بإحالة هذه المذكرة بالفعل إلى هذا المستخدم/القسم. انتظر حتى يتم الرد عليها."))
+        
+        # باقي التحققات الأصلية
+        if not self.to_user_id and not self.to_department_id:
+            raise UserError(_("يجب تحديد مستلم أو إدارة للمذكرة"))
         # التحقق من أن المستخدم المحدد ينتمي للقسم المحدد
         if self.to_department_id and self.to_user_id:
             if self.to_user_id.department_id != self.to_department_id:
@@ -82,29 +103,29 @@ class DocflexTicketReferralWizard(models.TransientModel):
             'state': 'pending'
         }
         
-        try:
-            # إنشاء سجل الإحالة
-            referral = self.env['docflex.ticket.referral'].create(referral_vals)
-            
-            # قفل المذكرة بعد الإحالة
-            self.ticket_id.write({
-                'is_locked': True,
-                'lock_reason': f'مقفولة بسبب الإحالة إلى {recipient}',
-                'lock_date': fields.Datetime.now(),
-                'locked_by': self.env.user.id
-            })
-            
-            # إرسال إشعارات
-            self._send_referral_notifications(referral)
-            
-            # إغلاق النافذة المنبثقة
-            return {
-                'type': 'ir.actions.act_window_close',
-                'context': {'default_referral_id': referral.id}
-            }
-        except Exception as e:
-            _logger.error("Failed to create referral: %s", str(e))
-            raise UserError(_("حدث خطأ أثناء إنشاء الإحالة. الرجاء المحاولة مرة أخرى."))
+        # try:
+        # إنشاء سجل الإحالة
+        referral = self.env['docflex.ticket.referral'].create(referral_vals)
+        
+        # قفل المذكرة بعد الإحالة
+        self.ticket_id.write({
+            'is_locked': True,
+            'lock_reason': f'مقفولة بسبب الإحالة إلى {recipient}',
+            'lock_date': fields.Datetime.now(),
+            'locked_by': self.env.user.id
+        })
+        
+        # إرسال إشعارات
+        self._send_referral_notifications(referral)
+        
+        # إغلاق النافذة المنبثقة
+        return {
+            'type': 'ir.actions.act_window_close',
+            'context': {'default_referral_id': referral.id}
+        }
+        # except Exception as e:
+        #     _logger.error("Failed to create referral: %s", str(e))
+        #     raise UserError(_("حدث خطأ أثناء إنشاء الإحالة. الرجاء المحاولة مرة أخرى."))
 
 
     def _send_referral_notifications(self, referral):

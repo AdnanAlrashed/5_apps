@@ -51,3 +51,6 @@ class DocflexTicketReferral(models.Model):
     def _onchange_referral_type(self):
         if self.referral_type_id and self.referral_type_id.default_deadline_days > 0:
             self.deadline = fields.Date.today() + timedelta(days=self.referral_type_id.default_deadline_days)
+
+    
+

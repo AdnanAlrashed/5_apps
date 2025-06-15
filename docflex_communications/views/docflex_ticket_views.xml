@@ -7,13 +7,6 @@
             <form string="docflex Ticket">
                 <header>
                     <field name="stage_id" widget="statusbar_duration" options="{'clickable': '1', 'fold_field': 'fold'}"/>
-    
-                    <!-- في جزء header -->
-                    <!-- <button name="action_refer_ticket" 
-                        type="object" 
-                        string="إحالة المذكرة" 
-                        class="btn-primary"
-                        /> -->
 
                     <button name="action_view_referrals" 
                             type="object" 
@@ -36,6 +29,7 @@
                                 type="object"
                                 class="oe_highlight"
                                 groups="base.group_user"
+                                invisible="is_archived or is_locked"
                                  />
                                  <!-- groups="docflex_communications.group_department_manager" -->
                         <button class="oe_stat_button" 
@@ -45,7 +39,7 @@
                             <field string="الإحالات" name="referral_count" widget="statinfo"/>
                         </button>
                         <button name="action_mark_waiting_archive" type="object" string="طلب أرشفة" class="btn btn-outline-secondary"
-                            invisible="not active or wait_archive or user_id != uid" />
+                            invisible="not active or wait_archive or user_id != uid or is_archived or is_locked" />
                         
                         <button name="action_cancel_archive_request" type="object" string="إلغاء طلب الأرشفة" class="btn btn-outline-warning"
                             invisible="not wait_archive or not active"/>
@@ -117,7 +111,7 @@
                             
                             <h1 class="d-flex flex-row align-items-center">
                                 <field name="name" options="{'line_breaks': False}" widget="text" class="field_name" placeholder="e.g. Product arrived damaged"
-                                    required="True" style="font-size: min(4vw, 2.6rem);" readonly="is_archived"/>
+                                    required="True" style="font-size: min(4vw, 2.6rem);" readonly="is_archived or is_locked"/>
                             </h1>
                             <h2><field name="number"/></h2>
                         </div>
@@ -125,18 +119,18 @@
                     <group class="mb-0 mt-4">
                         <group>
                             <field name="ticket_type" domain="[('code', '=', context.get('code'))]" invisible="1"/>
-                            <field name="ticket_section_id" />
-                            <field name="ticket_date" />
-                            <field name="is_urgent" invisible="1"/>
-                            <field name="current_referral_id" invisible="1"/>
-                            <field name="is_archived" invisible="1" />
+                            <field name="ticket_section_id" readonly="is_archived or is_locked" />
+                            <field name="ticket_date" readonly="is_archived or is_locked" />
+                            <field name="is_urgent" invisible="1" readonly="is_archived or is_locked"/>
+                            <field name="current_referral_id" invisible="1" readonly="is_archived or is_locked"/>
+                            <field name="is_archived" invisible="1" readonly="is_archived or is_locked"/>
                         </group>
                         <group>
-                            <field name="ticket_summary_id" />
-                            <field name="referrenc_number" />
-                            <field name="active" invisible="1"/>
+                            <field name="ticket_summary_id" readonly="is_archived or is_locked" />
+                            <field name="referrenc_number" readonly="is_archived or is_locked" />
+                            <field name="active" invisible="1" readonly="is_archived or is_locked"/>
                             <!-- <field name="team_id" required="1" context="{'kanban_view_ref': 'docflex.docflex_team_view_kanban_mobile', 'default_use_sla': True}"/> -->
-                            <field name="domain_user_ids" invisible="1"/>
+                            <field name="domain_user_ids" invisible="1" readonly="is_archived or is_locked"/>
                             
                             <!-- <field name="ticket_type_id" options="{'no_open': True}"/> -->
                            
@@ -146,7 +140,7 @@
                             <field name="partner_from_id" class="field_partner_from_id" domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]" widget="res_partner_many2one" context="{'default_phone': partner_phone}"/>
                             <field name="partner_to_id" class="field_partner_to_id" domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]" widget="res_partner_many2one" context="{'default_phone': partner_phone}"/>
                             <field name="is_partner_phone_update" invisible="1"/>
-                            <label for="partner_phone" string="Phone"/>
+                            <label for="partner_phone" string="Phone" readonly="is_archived or is_locked"/>
                             <div class="o_row o_row_readonly">
                                 <field name="partner_phone" widget="phone" string="Phone"/>
                                 <span class="fa fa-exclamation-triangle text-warning oe_edit_only"
@@ -159,20 +153,20 @@
                         </group>
                        
                         <group>
-                            <field name="ticket_security_id" readonly="is_archived" />
+                            <field name="ticket_security_id" readonly="is_archived or is_locked" />
                             <!-- widget="priority" -->
-                            <field name="ticket_priority_id" />
+                            <field name="ticket_priority_id" readonly="is_archived or is_locked" />
                         </group>
                         <group>
                             <!-- <field name="number" /> -->
-                            <field name="ticket_classification_id" />
-                            <field name="folder_id" />
+                            <field name="ticket_classification_id" readonly="is_archived or is_locked" />
+                            <field name="folder_id" readonly="is_archived or is_locked" />
                             <!-- <field name="topic" /> -->
                             <!-- <field name="ticket_status_id" /> -->
                             <field name="wait_archive" invisible="wait_archive == False" readonly="1"/>
                         </group>
                          <group>
-                            <field name="note" />
+                            <field name="note" readonly="is_archived or is_locked" />
                             <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
                              
                         </group>
@@ -195,22 +189,7 @@
                             </group>
                         </page>
                         <!-- استبدال صفحة المرفقات الحالية بهذا -->
-                        <!-- <page string="المرفقات" name="attachments" invisible="1">
-                            <div class="oe_attachment_view">
-                                <field name="attachment_ids" widget="many2many_binary" 
-                                    options="{
-                                        'preview': True,
-                                        'editable': True,
-                                        'accepted_file_extensions': '.pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx',
-                                        'upload': True,
-                                        'multi_upload': True
-                                    }"/>
-                                <div class="oe_attachment_stats">
-                                    <field name="attachment_number" string="عدد المرفقات"/>
-                                    <field name="document_count" string="عدد المستندات"/>
-                                </div>
-                            </div>
-                        </page> -->
+                        
                         <page string="إعدادات المستندات" name="documents_settings" groups="base.group_multi_company">
                             <group>
                                 <field name="documents_folder_id" readonly="1"
@@ -598,7 +577,7 @@
             name="إحالات المذكرات" 
             parent="docflex_ticket_menue" 
             action="action_ticket_referrals"
-            groups="docflex_communications.docflex_super_manager_group"
+            groups="docflex_communications.group_ticket_referral"
             sequence="3"/>
 
 </odoo>

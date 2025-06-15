@@ -356,9 +356,9 @@ class DoflexTicket(models.Model):
                 - cancel (إلغاء طلب الأرشفة)
             - في حالة تعطيل المذكرة (active=False)، يتم تلقائيًا تعيين المرحلة إلى "مؤرشف".
         """
-        for record in self:
-            if record.is_locked and not self.env.context.get('bypass_lock'):
-                raise UserError(_("لا يمكن التعديل على المذكرة أثناء وجود إحالة نشطة. السبب: %s") % record.lock_reason)
+        # for record in self:
+        #     if record.is_locked and not self.env.context.get('bypass_lock'):
+        #         raise UserError(_("لا يمكن التعديل على المذكرة أثناء وجود إحالة نشطة. السبب: %s") % record.lock_reason)
 
         for ticket in self:
             stage_code = ticket.stage_id.code if ticket.stage_id else False
@@ -894,3 +894,44 @@ class DoflexTicket(models.Model):
     def _compute_is_urgent(self):
         for rec in self:
             rec.is_urgent = rec.ticket_priority_id.name == 'عاجل'
+
+    def check_previous_referral(self, to_user_id=False, to_department_id=False):
+        """
+        التحقق من وجود إحالة سابقة لنفس المستخدم/القسم
+        """
+        self.ensure_one()
+        domain = [
+            ('ticket_id', '=', self.id),
+            ('from_user_id', '=', self.env.user.id),
+            ('state', 'in', ['pending', 'received'])
+        ]
+        
+        if to_user_id:
+            domain.append(('to_user_id', '=', to_user_id))
+        elif to_department_id:
+            domain.append(('to_department_id', '=', to_department_id))
+            
+        return bool(self.env['docflex.ticket.referral'].search(domain, limit=1))
+
+
+    @api.onchange('to_department_id', 'to_user_id')
+    def _onchange_recipient(self):
+        if self.ticket_id and (self.to_user_id or self.to_department_id):
+            if self.to_user_id and self.to_user_id.id == self.env.user.id:
+                return {
+                    'warning': {
+                        'title': _("تحذير"),
+                        'message': _("لا يمكنك إحالة المذكرة لنفسك!")
+                    }
+                }
+            
+            if self.ticket_id.check_previous_referral(
+                to_user_id=self.to_user_id.id if self.to_user_id else False,
+                to_department_id=self.to_department_id.id if self.to_department_id else False
+            ):
+                return {
+                    'warning': {
+                        'title': _("تحذير"),
+                        'message': _("لقد قمت بإحالة هذه المذكرة بالفعل إلى هذا المستخدم/القسم!")
+                    }
+                }

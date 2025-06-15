@@ -210,6 +210,11 @@ class DoflexTicket(models.Model):
         compute='_compute_referral_count'
     )
 
+    is_locked = fields.Boolean(string="مقفولة", default=False)
+    lock_reason = fields.Text(string="سبب القفل")
+    lock_date = fields.Datetime(string="تاريخ القفل")
+    locked_by = fields.Many2one('res.users', string="مقفولة بواسطة")
+
     @api.depends('referral_ids')
     def _compute_current_referral(self):
         for ticket in self:
@@ -243,6 +248,13 @@ class DoflexTicket(models.Model):
         حدث استلام الإحالات
         """
         self.ensure_one()
+        self.write({
+        'is_locked': False,
+        'lock_reason': False,
+        'lock_date': False,
+        'locked_by': False
+    })
+    
         if not self.current_referral_id:
             raise UserError(_("لا توجد إحالة حالية لقبولها"))
         
@@ -283,6 +295,12 @@ class DoflexTicket(models.Model):
 
     def action_reject_referral(self):
         self.ensure_one()
+        self.write({
+        'is_locked': False,
+        'lock_reason': False,
+        'lock_date': False,
+        'locked_by': False
+    })
         return {
             'name': _('رفض الإحالة'),
             'type': 'ir.actions.act_window',
@@ -338,6 +356,9 @@ class DoflexTicket(models.Model):
                 - cancel (إلغاء طلب الأرشفة)
             - في حالة تعطيل المذكرة (active=False)، يتم تلقائيًا تعيين المرحلة إلى "مؤرشف".
         """
+        # for record in self:
+        #     if record.is_locked and not self.env.context.get('bypass_lock'):
+        #         raise UserError(_("لا يمكن التعديل على المذكرة أثناء وجود إحالة نشطة. السبب: %s") % record.lock_reason)
 
         for ticket in self:
             stage_code = ticket.stage_id.code if ticket.stage_id else False
@@ -437,6 +458,10 @@ class DoflexTicket(models.Model):
         - يرسل تنبيهًا إلى مدير الإدارة (إن وُجد)
         """
 
+        self.ensure_one()
+        if self.is_locked:
+            raise UserError(_("لا يمكن طلب أرشفة مذكرة مقفولة بسبب إحالة نشطة"))
+
         waiting_stage = self.env['docflex.ticket.stage'].search(
             [('code', '=', 'archiving')],  # تأكد أن المرحلة لها code ثابت = archiving
             limit=1
@@ -533,6 +558,10 @@ class DoflexTicket(models.Model):
         - يسجل التاريخ في archive_date
         - يسجل إشعارًا في سجل المذكرة
         """
+
+        self.ensure_one()
+        if self.is_locked:
+            raise UserError(_("لا يمكن أرشفة مذكرة مقفولة بسبب إحالة نشطة"))
 
         archived_stage = self.env['docflex.ticket.stage'].search(
             [('code', '=', 'archived')], 
@@ -865,3 +894,44 @@ class DoflexTicket(models.Model):
     def _compute_is_urgent(self):
         for rec in self:
             rec.is_urgent = rec.ticket_priority_id.name == 'عاجل'
+
+    def check_previous_referral(self, to_user_id=False, to_department_id=False):
+        """
+        التحقق من وجود إحالة سابقة لنفس المستخدم/القسم
+        """
+        self.ensure_one()
+        domain = [
+            ('ticket_id', '=', self.id),
+            ('from_user_id', '=', self.env.user.id),
+            ('state', 'in', ['pending', 'received'])
+        ]
+        
+        if to_user_id:
+            domain.append(('to_user_id', '=', to_user_id))
+        elif to_department_id:
+            domain.append(('to_department_id', '=', to_department_id))
+            
+        return bool(self.env['docflex.ticket.referral'].search(domain, limit=1))
+
+
+    @api.onchange('to_department_id', 'to_user_id')
+    def _onchange_recipient(self):
+        if self.ticket_id and (self.to_user_id or self.to_department_id):
+            if self.to_user_id and self.to_user_id.id == self.env.user.id:
+                return {
+                    'warning': {
+                        'title': _("تحذير"),
+                        'message': _("لا يمكنك إحالة المذكرة لنفسك!")
+                    }
+                }
+            
+            if self.ticket_id.check_previous_referral(
+                to_user_id=self.to_user_id.id if self.to_user_id else False,
+                to_department_id=self.to_department_id.id if self.to_department_id else False
+            ):
+                return {
+                    'warning': {
+                        'title': _("تحذير"),
+                        'message': _("لقد قمت بإحالة هذه المذكرة بالفعل إلى هذا المستخدم/القسم!")
+                    }
+                }

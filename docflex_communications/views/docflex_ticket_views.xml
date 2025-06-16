@@ -555,29 +555,6 @@
     </record>
     
 
-    <menuitem id="docflex_main_menue" name="DocFlex Communications" web_icon="docflex_communications,static/src/img/doc.png" sequence="1"/>
-    <menuitem id="docflex_config_menue" name="التهيئة" parent="docflex_main_menue" sequence="4"/>
-    <menuitem id="docflex_ticket_menue" name="العمليات" parent="docflex_main_menue" sequence="4"/>
-
-    <menuitem id="menu_incoming_memos"
-        name="المذكرات الواردة"
-        parent="docflex_ticket_menue"
-        action="action_incoming_memos"
-        groups="docflex_communications.docflex_super_manager_group"
-        sequence="1"/>
-
-    <menuitem id="menu_outgoing_memos"
-        name="المذكرات الصادره"
-        parent="docflex_ticket_menue"
-        action="action_outgoing_memos"
-        groups="docflex_communications.docflex_super_manager_group"
-        sequence="2"/>
-
-    <menuitem id="menu_ticket_referrals" 
-            name="إحالات المذكرات" 
-            parent="docflex_ticket_menue" 
-            action="action_ticket_referrals"
-            groups="docflex_communications.group_ticket_referral"
-            sequence="3"/>
+    
 
 </odoo>
